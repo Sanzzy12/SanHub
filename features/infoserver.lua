@@ -125,7 +125,7 @@ end
 -- ============================================================
 local function makeCopyBtn(parent, getValue, xPos, yPos, zindex)
     local btn = Instance.new("TextButton", parent)
-    btn.Text = "⎘ Copy"
+    btn.Text = "📋 Copy"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 10
     btn.TextColor3 = T.Text
