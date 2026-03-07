@@ -198,7 +198,7 @@ local serverData = {
 -- ============================================================
 -- CARD 1 — SERVER INFO
 -- ============================================================
-local card1 = makeCard(1, 170)
+local card1 = makeCard(2, 210)
 cardTitle(card1, "rbxassetid://7733960981", "SERVER INFO", 9)
 
 local infoLayout = Instance.new("UIListLayout", card1)
@@ -206,12 +206,13 @@ infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 infoLayout.Padding = UDim.new(0, 4)
 
 -- Row helper
-local function infoRow(card, labelTxt, order)
+local function infoRow(card, labelTxt, order, withCopy)
     local row = Instance.new("Frame", card)
     row.Size = UDim2.new(1, 0, 0, 22)
     row.BackgroundTransparency = 1
     row.LayoutOrder = order
     row.ZIndex = 9
+    row.ClipsDescendants = false
 
     local lbl = Instance.new("TextLabel", row)
     lbl.Text = labelTxt
@@ -219,21 +220,27 @@ local function infoRow(card, labelTxt, order)
     lbl.TextSize = 11
     lbl.TextColor3 = T.TextMuted
     lbl.BackgroundTransparency = 1
-    lbl.Size = UDim2.new(0, 90, 1, 0)
+    lbl.Size = UDim2.new(0, 80, 1, 0)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.ZIndex = 9
 
+    -- Val width depends on whether there's a copy button
+    local valRight = withCopy and -150 or -86
     local val = Instance.new("TextLabel", row)
     val.Text = "Loading..."
     val.Font = Enum.Font.Gotham
     val.TextSize = 11
     val.TextColor3 = T.Text
     val.BackgroundTransparency = 1
-    val.Size = UDim2.new(1, -96, 1, 0)
-    val.Position = UDim2.new(0, 96, 0, 0)
+    val.Size = UDim2.new(1, valRight, 1, 0)
+    val.Position = UDim2.new(0, 84, 0, 0)
     val.TextXAlignment = Enum.TextXAlignment.Left
     val.TextTruncate = Enum.TextTruncate.AtEnd
     val.ZIndex = 9
+
+    if withCopy then
+        makeCopyBtn(row, function() return val.Text end, UDim2.new(1, -62, 0.5, -11), nil, 10)
+    end
 
     return row, val
 end
@@ -242,17 +249,18 @@ end
 local sp0 = Instance.new("Frame", card1)
 sp0.Size = UDim2.new(1,0,0,2); sp0.BackgroundTransparency=1; sp0.LayoutOrder=0
 
-local _, jobIdVal    = infoRow(card1, "Job ID",    1)
-local _, placeIdVal  = infoRow(card1, "Place ID",  2)
-local _, regionVal   = infoRow(card1, "Region",    3)
-local _, pingVal     = infoRow(card1, "Ping",      4)
-local _, ageVal      = infoRow(card1, "Server Age",5)
+local _, serverNameVal = infoRow(card1, "Srv Name",  1, false)
+local _, jobIdVal      = infoRow(card1, "Job ID",    2, false)
+local placeIdRow, placeIdVal = infoRow(card1, "Place ID",  3, true)
+local _, regionVal     = infoRow(card1, "Region",    4, false)
+local _, pingVal       = infoRow(card1, "Ping",      5, false)
+local _, ageVal        = infoRow(card1, "Server Age",6, false)
 
 -- Status row (special)
 local statusRow = Instance.new("Frame", card1)
 statusRow.Size = UDim2.new(1,0,0,22)
 statusRow.BackgroundTransparency = 1
-statusRow.LayoutOrder = 6
+statusRow.LayoutOrder = 7
 statusRow.ZIndex = 9
 
 local statusLblKey = Instance.new("TextLabel", statusRow)
@@ -281,7 +289,7 @@ statusValLbl.ZIndex = 9
 -- ============================================================
 -- CARD 2 — PLAYERS
 -- ============================================================
-local card2 = makeCard(2, 110)
+local card2 = makeCard(3, 110)
 
 local c2layout = Instance.new("UIListLayout", card2)
 c2layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -349,7 +357,7 @@ playerNamesLbl.ZIndex = 9
 -- ============================================================
 -- CARD 3 — SERVER URL
 -- ============================================================
-local card3 = makeCard(3, 100)
+local card3 = makeCard(4, 100)
 
 local c3layout = Instance.new("UIListLayout", card3)
 c3layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -440,7 +448,7 @@ makeCopyBtn(vipRow, function() return vipUrlLbl.Text end,
 -- ============================================================
 -- CARD 4 — JOIN SERVER BY URL
 -- ============================================================
-local card4 = makeCard(4, 120)
+local card4 = makeCard(5, 120)
 
 local c4layout = Instance.new("UIListLayout", card4)
 c4layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -591,7 +599,7 @@ end)
 -- ============================================================
 -- CARD 5 — EXTRA INFO
 -- ============================================================
-local card5 = makeCard(5, 130)
+local card5 = makeCard(6, 130)
 
 local c5layout = Instance.new("UIListLayout", card5)
 c5layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -599,16 +607,16 @@ c5layout.Padding = UDim.new(0, 4)
 
 cardTitle(card5, "rbxassetid://134341920489415", "EXTRA", 9).LayoutOrder = 0
 
-local _, uptimeVal   = infoRow(card5, "Uptime",      1)
-local _, placeVerVal = infoRow(card5, "Place Ver",   2)
-local _, gameNameVal = infoRow(card5, "Game Name",   3)
-local _, creatorVal  = infoRow(card5, "Creator",     4)
-local _, serverIpVal = infoRow(card5, "Server IP",   5)
+local _, uptimeVal   = infoRow(card5, "Uptime",      1, false)
+local _, placeVerVal = infoRow(card5, "Place Ver",   2, false)
+local _, gameNameVal = infoRow(card5, "Game Name",   3, false)
+local _, creatorVal  = infoRow(card5, "Creator",     4, false)
+local _, serverIpVal = infoRow(card5, "Server IP",   5, false)
 
 -- ============================================================
 -- CARD 6 — MAP / GAME STATUS
 -- ============================================================
-local card6 = makeCard(6, 160)
+local card6 = makeCard(7, 160)
 
 local c6layout = Instance.new("UIListLayout", card6)
 c6layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -616,12 +624,12 @@ c6layout.Padding = UDim.new(0, 4)
 
 cardTitle(card6, "rbxassetid://7733960981", "MAP & GAME STATUS", 9).LayoutOrder = 0
 
-local _, mapNameVal     = infoRow(card6, "Map / Place",  1)
-local _, lightingVal    = infoRow(card6, "Time of Day",  2)
-local _, weatherVal     = infoRow(card6, "Atmosphere",   3)
-local _, gravityVal     = infoRow(card6, "Gravity",      4)
-local _, ambientVal     = infoRow(card6, "Ambient",      5)
-local _, streamingVal   = infoRow(card6, "Streaming",    6)
+local _, mapNameVal     = infoRow(card6, "Map / Place",  1, false)
+local _, lightingVal    = infoRow(card6, "Time of Day",  2, false)
+local _, weatherVal     = infoRow(card6, "Atmosphere",   3, false)
+local _, gravityVal     = infoRow(card6, "Gravity",      4, false)
+local _, ambientVal     = infoRow(card6, "Ambient",      5, false)
+local _, streamingVal   = infoRow(card6, "Streaming",    6, false)
 
 -- Populate static map/game data immediately (no HTTP needed)
 do
@@ -647,7 +655,7 @@ end
 -- ============================================================
 -- CARD 7 — REJOIN
 -- ============================================================
-local card7 = makeCard(7, 105)
+local card7 = makeCard(1, 105)
 
 local c7layout = Instance.new("UIListLayout", card7)
 c7layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -740,9 +748,147 @@ rejoinNewBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ============================================================
+-- CARD 8 — JOIN LOW PLAYER SERVER
+-- ============================================================
+local card8 = makeCard(8, 120)
+
+local c8layout = Instance.new("UIListLayout", card8)
+c8layout.SortOrder = Enum.SortOrder.LayoutOrder
+c8layout.Padding = UDim.new(0, 8)
+
+cardTitle(card8, "rbxassetid://5578470911", "JOIN LOW PLAYER", 9).LayoutOrder = 0
+
+-- Info text
+local lowInfo = Instance.new("TextLabel", card8)
+lowInfo.Text = "Find and join a server with the fewest players"
+lowInfo.Font = Enum.Font.Gotham
+lowInfo.TextSize = 10
+lowInfo.TextColor3 = T.TextMuted
+lowInfo.BackgroundTransparency = 1
+lowInfo.Size = UDim2.new(1, 0, 0, 14)
+lowInfo.TextXAlignment = Enum.TextXAlignment.Left
+lowInfo.TextWrapped = true
+lowInfo.ZIndex = 9
+lowInfo.LayoutOrder = 1
+
+-- Status label
+local lowStatusLbl = Instance.new("TextLabel", card8)
+lowStatusLbl.Text = ""
+lowStatusLbl.Font = Enum.Font.Gotham
+lowStatusLbl.TextSize = 10
+lowStatusLbl.TextColor3 = T.TextMuted
+lowStatusLbl.BackgroundTransparency = 1
+lowStatusLbl.Size = UDim2.new(1, 0, 0, 14)
+lowStatusLbl.TextXAlignment = Enum.TextXAlignment.Left
+lowStatusLbl.ZIndex = 9
+lowStatusLbl.LayoutOrder = 2
+
+-- Button row
+local lowBtnRow = Instance.new("Frame", card8)
+lowBtnRow.Size = UDim2.new(1, 0, 0, 32)
+lowBtnRow.BackgroundTransparency = 1
+lowBtnRow.LayoutOrder = 3
+lowBtnRow.ZIndex = 9
+
+local joinLowBtn = Instance.new("TextButton", lowBtnRow)
+joinLowBtn.Text = "🔍  Find Low Player Server"
+joinLowBtn.Font = Enum.Font.GothamBold
+joinLowBtn.TextSize = 11
+joinLowBtn.TextColor3 = T.Text
+joinLowBtn.BackgroundColor3 = T.Primary
+joinLowBtn.BorderSizePixel = 0
+joinLowBtn.Size = UDim2.new(1, 0, 1, 0)
+joinLowBtn.ZIndex = 10
+mkCorner(joinLowBtn, 8)
+mkStroke(joinLowBtn, T.PrimaryDark, 0.4)
+
+joinLowBtn.MouseEnter:Connect(function()
+    TweenService:Create(joinLowBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.PrimaryLight}):Play()
+end)
+joinLowBtn.MouseLeave:Connect(function()
+    TweenService:Create(joinLowBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.Primary}):Play()
+end)
+
+joinLowBtn.MouseButton1Click:Connect(function()
+    joinLowBtn.Text = "🔍  Searching..."
+    TweenService:Create(joinLowBtn, TweenInfo.new(0.1), {BackgroundColor3 = T.PrimaryDark}):Play()
+    lowStatusLbl.Text = "Fetching server list..."
+    lowStatusLbl.TextColor3 = T.TextMuted
+
+    coroutine.wrap(function()
+        local placeId = game.PlaceId
+        local cursor = ""
+        local bestJobId = nil
+        local bestCount = math.huge
+        local found = false
+
+        -- Fetch up to 3 pages of servers to find the lowest
+        for page = 1, 3 do
+            local url = string.format(
+                "https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=25%s",
+                placeId,
+                cursor ~= "" and ("&cursor=" .. cursor) or ""
+            )
+            local ok, res = pcall(function()
+                return HttpService:RequestAsync({Url = url, Method = "GET"})
+            end)
+
+            if ok and res and res.StatusCode == 200 then
+                local ok2, data = pcall(function()
+                    return HttpService:JSONDecode(res.Body)
+                end)
+                if ok2 and data and data.data then
+                    for _, srv in ipairs(data.data) do
+                        local count = srv.playing or 0
+                        local maxP  = srv.maxPlayers or 1
+                        -- Skip full or current server, prefer servers with players > 0
+                        if count < bestCount and srv.id ~= game.JobId and count < maxP then
+                            bestCount  = count
+                            bestJobId  = srv.id
+                            found = true
+                        end
+                    end
+                    lowStatusLbl.Text = "Scanned page " .. page .. "..."
+                    if data.nextPageCursor and data.nextPageCursor ~= "" then
+                        cursor = data.nextPageCursor
+                    else
+                        break
+                    end
+                else
+                    break
+                end
+            else
+                lowStatusLbl.Text = "HTTP failed (HttpService off?)"
+                lowStatusLbl.TextColor3 = T.Error
+                break
+            end
+        end
+
+        if found and bestJobId then
+            lowStatusLbl.Text = "Found! Players: " .. bestCount .. " — Joining..."
+            lowStatusLbl.TextColor3 = T.Success
+            Notify("Loaded", "Joining low player server (" .. bestCount .. " players)...", 3)
+            task.wait(0.5)
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(placeId, bestJobId, Players.LocalPlayer)
+            end)
+        else
+            lowStatusLbl.Text = "No suitable server found."
+            lowStatusLbl.TextColor3 = T.Warning
+            Notify("Warning", "Tidak ada server yang ditemukan!", 3)
+        end
+
+        task.delay(2, function()
+            joinLowBtn.Text = "🔍  Find Low Player Server"
+            TweenService:Create(joinLowBtn, TweenInfo.new(0.2), {BackgroundColor3 = T.Primary}):Play()
+        end)
+    end)()
+end)
+
+-- ============================================================
 -- REFRESH BUTTON
 -- ============================================================
-local refreshCard = makeCard(8, 38)
+local refreshCard = makeCard(9, 38)
 refreshCard.BackgroundTransparency = 1
 
 local refreshBtn = Instance.new("TextButton", refreshCard)
@@ -803,6 +949,12 @@ local function refreshData()
         placeVerVal.Text = placeVer
         gameNameVal.Text = game.Name ~= "" and game.Name or "Unknown"
         creatorVal.Text  = game.CreatorId ~= 0 and tostring(game.CreatorId) or "Unknown"
+
+        -- Server name (try from MarketplaceService)
+        local snOk, snData = pcall(function()
+            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+        end)
+        serverNameVal.Text = (snOk and snData and snData.Name) and snData.Name or game.Name
 
         -- Player count & bar
         playerCountLbl.Text = curP .. " / " .. maxP
