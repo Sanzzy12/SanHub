@@ -9,8 +9,8 @@ pcall(function()
 -- FEATURE URLs  ← ganti sesuai raw URL kamu
 -- ============================================================
 local FeatureURLs = {
-    Animation  = "https://raw.githubusercontent.com/USERNAME/SanHub/main/features/animation.lua",
-    Walkspeed  = "https://raw.githubusercontent.com/USERNAME/SanHub/main/features/walkspeed.lua",
+    Animation  = "https://raw.githubusercontent.com/Sanzzy12/SanHub/main/features/animation.lua",
+    -- Walkspeed  = "https://raw.githubusercontent.com/USERNAME/SanHub/main/features/walkspeed.lua",
     -- tambah fitur baru di sini:
     -- NamaFitur = "https://...",
 }
