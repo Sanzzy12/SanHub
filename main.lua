@@ -1,27 +1,27 @@
 -- ============================================================
 --  SAN HUB — main.lua
---  Jalankan file ini. Fitur di-load otomatis pas menu diklik.
+--  Layout: Wrapper besar (draggable) = sidebar kiri + content kanan
+--  Ukuran sama kayak script asli: 0.5w x 0.62h
 -- ============================================================
 
 pcall(function()
 
 -- ============================================================
--- FEATURE URLs  ← ganti sesuai raw URL kamu
+-- FEATURE URLs
 -- ============================================================
 local FeatureURLs = {
     Animation  = "https://raw.githubusercontent.com/Sanzzy12/SanHub/main/features/animation.lua",
-    -- Walkspeed  = "https://raw.githubusercontent.com/USERNAME/SanHub/main/features/walkspeed.lua",
-    -- tambah fitur baru di sini:
-    -- NamaFitur = "https://...",
+    InfoServer = "https://raw.githubusercontent.com/Sanzzy12/SanHub/main/features/infoserver.lua",
+    -- Walkspeed = "https://raw.githubusercontent.com/Sanzzy12/SanHub/main/features/walkspeed.lua",
 }
 
 -- ============================================================
 -- SERVICES
 -- ============================================================
-local TweenService      = game:GetService("TweenService")
-local Players           = game:GetService("Players")
-local UserInputService  = game:GetService("UserInputService")
-local RunService        = game:GetService("RunService")
+local TweenService     = game:GetService("TweenService")
+local Players          = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService       = game:GetService("RunService")
 
 cloneref = cloneref or function(o) return o end
 local CoreGui = cloneref(game:GetService("CoreGui"))
@@ -36,15 +36,17 @@ if CoreGui:FindFirstChild(GUI_NAME) then
 end
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name  = GUI_NAME
+screenGui.Name = GUI_NAME
 screenGui.ResetOnSpawn = false
 screenGui.Parent = CoreGui
 
 -- ============================================================
--- SHARED TABLE  ← fitur baca/tulis di sini
+-- SHARED TABLE
 -- ============================================================
-_G.SanHub = _G.SanHub or {}
-_G.SanHub.Notify = nil  -- akan diisi setelah Notify dibuat
+_G.SanHub = {}
+_G.SanHub.Notify = nil
+_G.SanHub.Theme  = nil
+_G.SanHub.CurrentFrame = nil
 
 -- ============================================================
 -- THEME
@@ -65,39 +67,39 @@ local T = {
     Error        = Color3.fromRGB(255, 100, 120),
     Info         = Color3.fromRGB(130, 190, 255),
 }
+_G.SanHub.Theme = T
 
 -- ============================================================
 -- NOTIFICATION SYSTEM
 -- ============================================================
 local Notifbro = {}
-
 local NotifColors = {
-    Default          = T.Primary,
-    Loaded           = T.Success,
-    Error            = T.Error,
-    Warning          = T.Warning,
-    Set              = T.PrimaryLight,
-    Created          = T.Success,
-    Copied           = T.Info,
-    Database         = T.Info,
-    Welcome          = T.Accent,
-    Info             = T.Info,
-    ["First Time"]   = T.Warning,
-    ["Database Update"] = T.Success,
+    Default            = T.Primary,
+    Loaded             = T.Success,
+    Error              = T.Error,
+    Warning            = T.Warning,
+    Set                = T.PrimaryLight,
+    Created            = T.Success,
+    Copied             = T.Info,
+    Database           = T.Info,
+    Welcome            = T.Accent,
+    Info               = T.Info,
+    ["First Time"]     = T.Warning,
+    ["Database Update"]= T.Success,
 }
 local NotifIcons = {
-    Default          = "rbxassetid://134341920489415",
-    Loaded           = "rbxassetid://134341920489415",
-    Error            = "rbxassetid://16913919379",
-    Warning          = "rbxassetid://16913919379",
-    Set              = "rbxassetid://5578470911",
-    Created          = "rbxassetid://5578470911",
-    Copied           = "rbxassetid://5578470911",
-    Database         = "rbxassetid://5578470911",
-    Welcome          = "rbxassetid://134341920489415",
-    Info             = "rbxassetid://134341920489415",
-    ["First Time"]   = "rbxassetid://134341920489415",
-    ["Database Update"] = "rbxassetid://134341920489415",
+    Default            = "rbxassetid://134341920489415",
+    Loaded             = "rbxassetid://134341920489415",
+    Error              = "rbxassetid://16913919379",
+    Warning            = "rbxassetid://16913919379",
+    Set                = "rbxassetid://5578470911",
+    Created            = "rbxassetid://5578470911",
+    Copied             = "rbxassetid://5578470911",
+    Database           = "rbxassetid://5578470911",
+    Welcome            = "rbxassetid://134341920489415",
+    Info               = "rbxassetid://134341920489415",
+    ["First Time"]     = "rbxassetid://134341920489415",
+    ["Database Update"]= "rbxassetid://134341920489415",
 }
 
 local function Notify(title, text, duration)
@@ -109,8 +111,7 @@ local function Notify(title, text, duration)
         local ico = NotifIcons[title]  or NotifIcons.Default
 
         local G = Instance.new("ScreenGui")
-        G.Name   = "SanNotif"
-        G.Parent = CoreGui
+        G.Name = "SanNotif"; G.Parent = CoreGui
 
         local shadow = Instance.new("Frame", G)
         shadow.Size = UDim2.new(0, nw+8, 0, nh+8)
@@ -120,73 +121,49 @@ local function Notify(title, text, duration)
         Instance.new("UICorner", shadow).CornerRadius = UDim.new(0,16)
 
         local card = Instance.new("Frame", G)
-        card.Size  = UDim2.new(0, nw, 0, nh)
+        card.Size = UDim2.new(0, nw, 0, nh)
         card.BackgroundColor3 = T.BgMid
         card.BackgroundTransparency = 0.05
         card.BorderSizePixel = 0
         Instance.new("UICorner", card).CornerRadius = UDim.new(0,14)
 
         local bar = Instance.new("Frame", card)
-        bar.Size = UDim2.new(0,4,1,0)
-        bar.BackgroundColor3 = ac
-        bar.BorderSizePixel = 0
+        bar.Size = UDim2.new(0,4,1,0); bar.BackgroundColor3 = ac; bar.BorderSizePixel = 0
         Instance.new("UICorner", bar).CornerRadius = UDim.new(0,4)
 
-        local iFrame = Instance.new("Frame", card)
-        iFrame.Size = UDim2.new(0,38,0,38)
-        iFrame.Position = UDim2.new(0,16,0.5,-19)
-        iFrame.BackgroundColor3 = ac
-        iFrame.BackgroundTransparency = 0.75
-        iFrame.BorderSizePixel = 0
-        Instance.new("UICorner", iFrame).CornerRadius = UDim.new(0,10)
-
-        local iImg = Instance.new("ImageLabel", iFrame)
-        iImg.Size = UDim2.new(0,22,0,22)
-        iImg.Position = UDim2.new(0.5,-11,0.5,-11)
-        iImg.BackgroundTransparency = 1
-        iImg.Image = ico
-        iImg.ImageColor3 = ac
+        local iF = Instance.new("Frame", card)
+        iF.Size = UDim2.new(0,38,0,38); iF.Position = UDim2.new(0,16,0.5,-19)
+        iF.BackgroundColor3 = ac; iF.BackgroundTransparency = 0.75; iF.BorderSizePixel = 0
+        Instance.new("UICorner", iF).CornerRadius = UDim.new(0,10)
+        local iI = Instance.new("ImageLabel", iF)
+        iI.Size = UDim2.new(0,22,0,22); iI.Position = UDim2.new(0.5,-11,0.5,-11)
+        iI.BackgroundTransparency = 1; iI.Image = ico; iI.ImageColor3 = ac
 
         local tl = Instance.new("TextLabel", card)
-        tl.BackgroundTransparency = 1
-        tl.Size = UDim2.new(1,-80,0,22)
-        tl.Position = UDim2.new(0,66,0,10)
-        tl.Font = Enum.Font.GothamBold
-        tl.TextSize = 13
-        tl.Text = title
-        tl.TextColor3 = ac
+        tl.BackgroundTransparency = 1; tl.Size = UDim2.new(1,-80,0,22)
+        tl.Position = UDim2.new(0,66,0,10); tl.Font = Enum.Font.GothamBold
+        tl.TextSize = 13; tl.Text = title; tl.TextColor3 = ac
         tl.TextXAlignment = Enum.TextXAlignment.Left
 
         local ml = Instance.new("TextLabel", card)
-        ml.BackgroundTransparency = 1
-        ml.Size = UDim2.new(1,-80,0,24)
-        ml.Position = UDim2.new(0,66,0,33)
-        ml.Font = Enum.Font.Gotham
-        ml.TextSize = 11
-        ml.Text = text
-        ml.TextColor3 = T.TextMuted
-        ml.TextXAlignment = Enum.TextXAlignment.Left
-        ml.TextWrapped = true
+        ml.BackgroundTransparency = 1; ml.Size = UDim2.new(1,-80,0,24)
+        ml.Position = UDim2.new(0,66,0,33); ml.Font = Enum.Font.Gotham
+        ml.TextSize = 11; ml.Text = text; ml.TextColor3 = T.TextMuted
+        ml.TextXAlignment = Enum.TextXAlignment.Left; ml.TextWrapped = true
 
         local pbg = Instance.new("Frame", card)
-        pbg.Size = UDim2.new(1,-8,0,3)
-        pbg.Position = UDim2.new(0,4,1,-5)
-        pbg.BackgroundColor3 = T.BgLight
-        pbg.BorderSizePixel = 0
+        pbg.Size = UDim2.new(1,-8,0,3); pbg.Position = UDim2.new(0,4,1,-5)
+        pbg.BackgroundColor3 = T.BgLight; pbg.BorderSizePixel = 0
         Instance.new("UICorner", pbg).CornerRadius = UDim.new(1,0)
-
         local pb = Instance.new("Frame", pbg)
-        pb.Size = UDim2.new(1,0,1,0)
-        pb.BackgroundColor3 = ac
-        pb.BorderSizePixel = 0
+        pb.Size = UDim2.new(1,0,1,0); pb.BackgroundColor3 = ac; pb.BorderSizePixel = 0
         Instance.new("UICorner", pb).CornerRadius = UDim.new(1,0)
 
         local offset = 20
         for _, n in ipairs(Notifbro) do offset = offset + n.Size.Y.Offset + 12 end
-
         local sX = UDim2.new(1, nw+10, 0, offset)
         local eX = UDim2.new(1,-nw-16, 0, offset)
-        card.Position   = sX
+        card.Position = sX
         shadow.Position = UDim2.new(sX.X.Scale, sX.X.Offset-4, sX.Y.Scale, sX.Y.Offset-4)
         table.insert(Notifbro, card)
 
@@ -194,7 +171,6 @@ local function Notify(title, text, duration)
         TweenService:Create(card,   TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position=eX}):Play()
         TweenService:Create(shadow, TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position=UDim2.new(eX.X.Scale,eX.X.Offset-4,eX.Y.Scale,eX.Y.Offset-4)}):Play()
         TweenService:Create(pb,     TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size=UDim2.new(0,0,1,0)}):Play()
-
         task.wait(duration)
         TweenService:Create(card,   TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Position=sX, BackgroundTransparency=0.7}):Play()
         TweenService:Create(shadow, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Position=UDim2.new(sX.X.Scale,sX.X.Offset-4,sX.Y.Scale,sX.Y.Offset-4), BackgroundTransparency=1}):Play()
@@ -211,17 +187,20 @@ local function Notify(title, text, duration)
     end)()
 end
 
--- expose ke fitur
 _G.SanHub.Notify = Notify
 
 -- ============================================================
 -- HELPER
 -- ============================================================
-local function corner(p, r) Instance.new("UICorner",p).CornerRadius=UDim.new(0,r or 12) end
-local function stroke(p, col, thick, trans)
-    local s = Instance.new("UIStroke",p)
-    s.Color=col or T.Primary; s.Thickness=thick or 1.5
-    s.Transparency=trans or 0.4; s.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+local function mkCorner(p, r)
+    Instance.new("UICorner", p).CornerRadius = UDim.new(0, r or 12)
+end
+local function mkStroke(p, col, thick, trans)
+    local s = Instance.new("UIStroke", p)
+    s.Color = col or T.Primary; s.Thickness = thick or 1.5
+    s.Transparency = trans or 0.4
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    return s
 end
 
 -- ============================================================
@@ -232,14 +211,19 @@ local isTouchDevice = UserInputService.TouchEnabled
     and not UserInputService.MouseEnabled
 
 -- ============================================================
--- TOGGLE ICON BUTTON
+-- SIDEBAR WIDTH
+-- ============================================================
+local SIDEBAR_W = 160  -- lebar sidebar kiri
+
+-- ============================================================
+-- TOGGLE ICON BUTTON (draggable, selalu visible)
 -- ============================================================
 local toggleBtn = Instance.new("ImageButton")
 toggleBtn.Name   = "ToggleButton"
 toggleBtn.Image  = "rbxassetid://8215093320"
 toggleBtn.ImageColor3 = T.Accent
-toggleBtn.Size   = UDim2.new(0,52,0,52)
-toggleBtn.Position = UDim2.new(0,10,0.5,-26)
+toggleBtn.Size   = UDim2.new(0, 52, 0, 52)
+toggleBtn.Position = UDim2.new(0, 10, 0.5, -26)
 toggleBtn.BackgroundColor3 = T.BgMid
 toggleBtn.BackgroundTransparency = 0.1
 toggleBtn.BorderSizePixel = 0
@@ -247,8 +231,8 @@ toggleBtn.Active = true
 toggleBtn.Draggable = true
 toggleBtn.ZIndex = 10
 toggleBtn.Parent = screenGui
-corner(toggleBtn, 26)
-stroke(toggleBtn, T.Primary, 1.5, 0.3)
+mkCorner(toggleBtn, 26)
+mkStroke(toggleBtn, T.Primary, 1.5, 0.3)
 
 TweenService:Create(toggleBtn,
     TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
@@ -256,229 +240,516 @@ TweenService:Create(toggleBtn,
 ):Play()
 
 -- ============================================================
--- HUB SIDEBAR FRAME
+-- MAIN WRAPPER (draggable, ukuran sama kayak script asli)
+-- Isi: sidebar kiri + content kanan
 -- ============================================================
-local HUB_W = 270
-local hubFrame = Instance.new("Frame")
-hubFrame.Name  = "HubFrame"
-hubFrame.Size  = UDim2.new(0, HUB_W, 0.74, 0)
-hubFrame.Position = UDim2.new(0, -HUB_W-20, 0.13, 0)
-hubFrame.BackgroundColor3 = T.BgDark
-hubFrame.BackgroundTransparency = 0.04
-hubFrame.BorderSizePixel = 0
-hubFrame.ClipsDescendants = true
-hubFrame.ZIndex = 5
-hubFrame.Visible = false
-hubFrame.Parent = screenGui
-corner(hubFrame, 16)
-stroke(hubFrame, T.Primary, 1.5, 0.4)
+local mainFrame = Instance.new("Frame")
+mainFrame.Name  = "MainFrame"
+mainFrame.Size  = UDim2.new(0.68, 0, 0.75, 0)
+mainFrame.Position = UDim2.new(0.16, 0, 0.12, 0)
+mainFrame.BackgroundColor3 = T.BgDark
+mainFrame.BackgroundTransparency = 0.05
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.ClipsDescendants = true
+mainFrame.ZIndex = 5
+mainFrame.Parent = screenGui
+mkCorner(mainFrame, 18)
 
-local hubGrad = Instance.new("UIGradient", hubFrame)
-hubGrad.Color = ColorSequence.new({
+local mainGrad = Instance.new("UIGradient", mainFrame)
+mainGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, T.BgMid),
     ColorSequenceKeypoint.new(1, T.BgDark),
 })
-hubGrad.Rotation = 135
+mainGrad.Rotation = 135
 
 -- ============================================================
--- SIDEBAR HEADER
+-- DRAG LOGIC (drag dari header)
 -- ============================================================
-local header = Instance.new("Frame", hubFrame)
-header.Size  = UDim2.new(1,0,0,58)
-header.BackgroundColor3 = T.BgDark
-header.BorderSizePixel = 0
-header.ZIndex = 6
-corner(header, 16)
+local dragging, dragStart, startPos = false, nil, nil
 
-local hGrad = Instance.new("UIGradient", header)
-hGrad.Color = ColorSequence.new({
+local function onDragStart(input)
+    dragging  = true
+    dragStart = input.Position
+    startPos  = mainFrame.Position
+end
+
+local function onDragMove(input)
+    if not dragging then return end
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(
+        startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+    )
+end
+
+local function onDragEnd()
+    dragging = false
+end
+
+-- ============================================================
+-- SIDEBAR FRAME (kiri, di dalam mainFrame)
+-- ============================================================
+local sidebar = Instance.new("Frame", mainFrame)
+sidebar.Name  = "Sidebar"
+sidebar.Size  = UDim2.new(0, SIDEBAR_W, 1, 0)
+sidebar.Position = UDim2.new(0, 0, 0, 0)
+sidebar.BackgroundColor3 = T.BgDark
+sidebar.BorderSizePixel  = 0
+sidebar.ZIndex = 6
+sidebar.ClipsDescendants = false
+-- Tidak pakai mkCorner di sidebar supaya rounded corner mainFrame tidak kepotong
+
+-- Gradient sidebar
+local sideGrad = Instance.new("UIGradient", sidebar)
+sideGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, T.PrimaryDark),
     ColorSequenceKeypoint.new(1, T.BgDark),
 })
-hGrad.Rotation = 90
+sideGrad.Rotation = 135
 
-local hIcon = Instance.new("ImageLabel", header)
-hIcon.Image  = "rbxassetid://12557404943"
-hIcon.ImageColor3 = T.Accent
-hIcon.Size   = UDim2.new(0,26,0,26)
-hIcon.Position = UDim2.new(0,12,0.5,-13)
-hIcon.BackgroundTransparency = 1
-hIcon.ZIndex = 7
+-- Garis separator kanan sidebar
+local sideDiv = Instance.new("Frame", sidebar)
+sideDiv.Size  = UDim2.new(0, 1, 1, 0)
+sideDiv.Position = UDim2.new(1, -1, 0, 0)
+sideDiv.BackgroundColor3 = T.PrimaryDark
+sideDiv.BackgroundTransparency = 0.3
+sideDiv.BorderSizePixel = 0
+sideDiv.ZIndex = 7
 
-local hTitle = Instance.new("TextLabel", header)
-hTitle.Text  = "SAN HUB"
-hTitle.Font  = Enum.Font.GothamBold
-hTitle.TextSize = 15
-hTitle.TextColor3 = T.Text
-hTitle.BackgroundTransparency = 1
-hTitle.Size  = UDim2.new(0,140,0,20)
-hTitle.Position = UDim2.new(0,46,0.5,-18)
-hTitle.TextXAlignment = Enum.TextXAlignment.Left
-hTitle.ZIndex = 7
+-- ============================================================
+-- SIDEBAR HEADER (logo + title, juga area drag)
+-- ============================================================
+local sideHeader = Instance.new("Frame", sidebar)
+sideHeader.Name  = "SideHeader"
+sideHeader.Size  = UDim2.new(1, 0, 0, 56)
+sideHeader.BackgroundColor3 = T.BgDark
+sideHeader.BorderSizePixel  = 0
+sideHeader.ZIndex = 7
 
-local hSub = Instance.new("TextLabel", header)
-hSub.Text   = "Script Hub"
-hSub.Font   = Enum.Font.Gotham
-hSub.TextSize = 10
-hSub.TextColor3 = T.TextMuted
-hSub.BackgroundTransparency = 1
-hSub.Size   = UDim2.new(0,140,0,13)
-hSub.Position = UDim2.new(0,46,0.5,4)
-hSub.TextXAlignment = Enum.TextXAlignment.Left
-hSub.ZIndex = 7
+local shGrad = Instance.new("UIGradient", sideHeader)
+shGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, T.PrimaryDark),
+    ColorSequenceKeypoint.new(1, T.BgDark),
+})
+shGrad.Rotation = 90
 
--- Close button
-local closeBtn = Instance.new("ImageButton", header)
-closeBtn.Image = "rbxassetid://91182229617087"
-closeBtn.ImageColor3 = T.Error
-closeBtn.BackgroundColor3 = Color3.fromRGB(60,28,38)
-closeBtn.Size  = UDim2.new(0,28,0,28)
-closeBtn.Position = UDim2.new(1,-38,0.5,-14)
-closeBtn.BorderSizePixel = 0
-closeBtn.ZIndex = 7
-corner(closeBtn, 14)
+local shIcon = Instance.new("ImageLabel", sideHeader)
+shIcon.Image  = "rbxassetid://12557404943"
+shIcon.ImageColor3 = T.Accent
+shIcon.Size   = UDim2.new(0, 24, 0, 24)
+shIcon.Position = UDim2.new(0, 10, 0.5, -12)
+shIcon.BackgroundTransparency = 1
+shIcon.ZIndex = 8
 
-closeBtn.MouseEnter:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(180,40,60)}):Play()
-end)
-closeBtn.MouseLeave:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60,28,38)}):Play()
-end)
+local shTitle = Instance.new("TextLabel", sideHeader)
+shTitle.Text  = "SAN HUB"
+shTitle.Font  = Enum.Font.GothamBold
+shTitle.TextSize = 13
+shTitle.TextColor3 = T.Text
+shTitle.BackgroundTransparency = 1
+shTitle.Size  = UDim2.new(1, -42, 0, 18)
+shTitle.Position = UDim2.new(0, 40, 0.5, -16)
+shTitle.TextXAlignment = Enum.TextXAlignment.Left
+shTitle.ZIndex = 8
+
+local shSub = Instance.new("TextLabel", sideHeader)
+shSub.Text   = "Script Hub"
+shSub.Font   = Enum.Font.Gotham
+shSub.TextSize = 9
+shSub.TextColor3 = T.TextMuted
+shSub.BackgroundTransparency = 1
+shSub.Size   = UDim2.new(1, -42, 0, 12)
+shSub.Position = UDim2.new(0, 40, 0.5, 4)
+shSub.TextXAlignment = Enum.TextXAlignment.Left
+shSub.ZIndex = 8
 
 -- Header separator
-local hLine = Instance.new("Frame", header)
-hLine.Size  = UDim2.new(0.88,0,0,1)
-hLine.Position = UDim2.new(0.06,0,1,-1)
-hLine.BackgroundColor3 = T.PrimaryDark
-hLine.BackgroundTransparency = 0.4
-hLine.BorderSizePixel = 0
-hLine.ZIndex = 7
+local shLine = Instance.new("Frame", sideHeader)
+shLine.Size  = UDim2.new(0.85, 0, 0, 1)
+shLine.Position = UDim2.new(0.075, 0, 1, -1)
+shLine.BackgroundColor3 = T.PrimaryDark
+shLine.BackgroundTransparency = 0.4
+shLine.BorderSizePixel = 0
+shLine.ZIndex = 8
+
+-- Drag dari header sidebar
+sideHeader.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        onDragStart(input)
+    end
+end)
+sideHeader.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        onDragEnd()
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch then
+        onDragMove(input)
+    end
+end)
 
 -- ============================================================
--- INFO BAR  (Clock | FPS | URL)
+-- INFO BAR di sidebar (Clock | FPS)
 -- ============================================================
-local infoBar = Instance.new("Frame", hubFrame)
-infoBar.Size  = UDim2.new(1,-16,0,26)
-infoBar.Position = UDim2.new(0,8,0,62)
+local infoBar = Instance.new("Frame", sidebar)
+infoBar.Size  = UDim2.new(1, -12, 0, 26)
+infoBar.Position = UDim2.new(0, 6, 0, 60)
 infoBar.BackgroundColor3 = T.BgCard
 infoBar.BackgroundTransparency = 0.2
 infoBar.BorderSizePixel = 0
 infoBar.ClipsDescendants = true
-infoBar.ZIndex = 6
-corner(infoBar, 8)
+infoBar.ZIndex = 7
+mkCorner(infoBar, 8)
 
-local function infoLabel(text, xScale, color)
-    local l = Instance.new("TextLabel", infoBar)
-    l.Text  = text
-    l.Font  = Enum.Font.GothamBold
-    l.TextSize = 10
-    l.TextColor3 = color or T.Text
-    l.BackgroundTransparency = 1
-    l.Size  = UDim2.new(0.33,0,1,0)
-    l.Position = UDim2.new(xScale,0,0,0)
-    l.TextXAlignment = Enum.TextXAlignment.Center
-    l.TextYAlignment = Enum.TextYAlignment.Center
-    l.ZIndex = 7
-    return l
-end
-local function infoSep(xScale)
-    local s = Instance.new("Frame", infoBar)
-    s.Size  = UDim2.new(0,1,0.5,0)
-    s.Position = UDim2.new(xScale,0,0.25,0)
-    s.BackgroundColor3 = T.PrimaryDark
-    s.BackgroundTransparency = 0.3
-    s.BorderSizePixel = 0
-    s.ZIndex = 7
-end
+local clockLbl = Instance.new("TextLabel", infoBar)
+clockLbl.Text  = "00:00:00"
+clockLbl.Font  = Enum.Font.GothamBold
+clockLbl.TextSize = 10
+clockLbl.TextColor3 = T.Accent
+clockLbl.BackgroundTransparency = 1
+clockLbl.Size  = UDim2.new(0.5, 0, 1, 0)
+clockLbl.TextXAlignment = Enum.TextXAlignment.Center
+clockLbl.TextYAlignment = Enum.TextYAlignment.Center
+clockLbl.ZIndex = 8
 
-local clockLbl = infoLabel("00:00:00", 0,    T.Accent)
-infoSep(0.33)
-local fpsLbl   = infoLabel("-- FPS",   0.33, T.Success)
-infoSep(0.66)
-infoLabel("sanzzy.xyz", 0.66, T.PrimaryLight)
+local ibSep = Instance.new("Frame", infoBar)
+ibSep.Size  = UDim2.new(0, 1, 0.5, 0)
+ibSep.Position = UDim2.new(0.5, 0, 0.25, 0)
+ibSep.BackgroundColor3 = T.PrimaryDark
+ibSep.BackgroundTransparency = 0.3
+ibSep.BorderSizePixel = 0
+ibSep.ZIndex = 8
+
+local fpsLbl = Instance.new("TextLabel", infoBar)
+fpsLbl.Text  = "-- FPS"
+fpsLbl.Font  = Enum.Font.GothamBold
+fpsLbl.TextSize = 10
+fpsLbl.TextColor3 = T.Success
+fpsLbl.BackgroundTransparency = 1
+fpsLbl.Size  = UDim2.new(0.5, 0, 1, 0)
+fpsLbl.Position = UDim2.new(0.5, 0, 0, 0)
+fpsLbl.TextXAlignment = Enum.TextXAlignment.Center
+fpsLbl.TextYAlignment = Enum.TextYAlignment.Center
+fpsLbl.ZIndex = 8
 
 -- FPS + Clock updater
 local fpsBuffer, lastFpsT, lastClkT = {}, 0, 0
 RunService.RenderStepped:Connect(function(dt)
     local now = os.clock()
     table.insert(fpsBuffer, 1/dt)
-    if #fpsBuffer > 20 then table.remove(fpsBuffer,1) end
+    if #fpsBuffer > 20 then table.remove(fpsBuffer, 1) end
     if now - lastFpsT >= 0.3 then
         lastFpsT = now
         local s = 0
-        for _,v in ipairs(fpsBuffer) do s=s+v end
-        local avg = math.floor(s/#fpsBuffer)
-        fpsLbl.Text = avg.." FPS"
-        fpsLbl.TextColor3 = avg>=55 and T.Success or avg>=30 and T.Warning or T.Error
+        for _, v in ipairs(fpsBuffer) do s = s + v end
+        local avg = math.floor(s / #fpsBuffer)
+        fpsLbl.Text = avg .. " FPS"
+        fpsLbl.TextColor3 = avg >= 55 and T.Success or avg >= 30 and T.Warning or T.Error
     end
     if now - lastClkT >= 1 then
         lastClkT = now
         local t = math.floor(tick())
-        clockLbl.Text = string.format("%02d:%02d:%02d", math.floor(t/3600)%24, math.floor(t/60)%60, t%60)
+        clockLbl.Text = string.format("%02d:%02d:%02d",
+            math.floor(t/3600)%24, math.floor(t/60)%60, t%60)
     end
 end)
 
+-- URL label bawah sidebar
+local urlLbl = Instance.new("TextLabel", sidebar)
+urlLbl.Text  = "sanzzy.xyz"
+urlLbl.Font  = Enum.Font.GothamBold
+urlLbl.TextSize = 9
+urlLbl.TextColor3 = T.PrimaryLight
+urlLbl.BackgroundTransparency = 1
+urlLbl.Size  = UDim2.new(1, 0, 0, 16)
+urlLbl.Position = UDim2.new(0, 0, 1, -20)
+urlLbl.TextXAlignment = Enum.TextXAlignment.Center
+urlLbl.ZIndex = 7
+
 -- ============================================================
--- MENU CONTAINER  (auto-height)
+-- MENU LIST (di sidebar, di bawah info bar)
 -- ============================================================
-local menuList = Instance.new("Frame", hubFrame)
+local menuList = Instance.new("Frame", sidebar)
 menuList.Name  = "MenuList"
-menuList.Size  = UDim2.new(1,-16,0,0)
-menuList.Position = UDim2.new(0,8,0,94)
+menuList.Size  = UDim2.new(1, -12, 1, -108)
+menuList.Position = UDim2.new(0, 6, 0, 92)
 menuList.BackgroundTransparency = 1
-menuList.ZIndex = 6
+menuList.ZIndex = 7
 
 local menuLayout = Instance.new("UIListLayout", menuList)
 menuLayout.SortOrder = Enum.SortOrder.LayoutOrder
-menuLayout.Padding   = UDim.new(0,5)
+menuLayout.Padding   = UDim.new(0, 5)
 
-menuLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    menuList.Size = UDim2.new(1,-16,0, menuLayout.AbsoluteContentSize.Y)
+-- ============================================================
+-- CONTENT AREA (kanan, di dalam mainFrame)
+-- ============================================================
+local contentArea = Instance.new("Frame", mainFrame)
+contentArea.Name  = "ContentArea"
+contentArea.Size  = UDim2.new(1, -SIDEBAR_W, 1, 0)
+contentArea.Position = UDim2.new(0, SIDEBAR_W, 0, 0)
+contentArea.BackgroundColor3 = T.BgDark
+contentArea.BorderSizePixel  = 0
+contentArea.ClipsDescendants = false
+contentArea.ZIndex = 6
+-- Tidak pakai corner di sini supaya sudut kanan mainFrame tetap rounded
+
+-- Placeholder saat belum ada fitur dibuka
+local placeholderLbl = Instance.new("TextLabel", contentArea)
+placeholderLbl.Text  = "← Pilih fitur dari menu"
+placeholderLbl.Font  = Enum.Font.GothamBold
+placeholderLbl.TextSize = 14
+placeholderLbl.TextColor3 = T.TextMuted
+placeholderLbl.BackgroundTransparency = 1
+placeholderLbl.Size  = UDim2.new(1, 0, 1, 0)
+placeholderLbl.TextXAlignment = Enum.TextXAlignment.Center
+placeholderLbl.TextYAlignment = Enum.TextYAlignment.Center
+placeholderLbl.ZIndex = 7
+
+-- ============================================================
+-- HEADER UTAMA (di content area, ada close button + title fitur)
+-- ============================================================
+local contentHeader = Instance.new("Frame", contentArea)
+contentHeader.Name  = "ContentHeader"
+contentHeader.Size  = UDim2.new(1, 0, 0, 56)
+contentHeader.BackgroundColor3 = T.BgDark
+contentHeader.BorderSizePixel  = 0
+contentHeader.ZIndex = 7
+
+local chGrad = Instance.new("UIGradient", contentHeader)
+chGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, T.BgDark),
+    ColorSequenceKeypoint.new(0.5, T.BgDark),
+    ColorSequenceKeypoint.new(1, T.PrimaryDark),
+})
+chGrad.Rotation = 90
+
+-- Title fitur aktif
+local contentTitle = Instance.new("TextLabel", contentHeader)
+contentTitle.Name  = "ContentTitle"
+contentTitle.Text  = "SAN ANIMATIONS"
+contentTitle.Font  = Enum.Font.GothamBold
+contentTitle.TextScaled = true
+contentTitle.TextColor3 = T.Text
+contentTitle.BackgroundTransparency = 1
+contentTitle.Size  = UDim2.new(0, 160, 0, 22)
+contentTitle.Position = UDim2.new(0, 14, 0.5, -18)
+contentTitle.TextXAlignment = Enum.TextXAlignment.Left
+contentTitle.ZIndex = 8
+
+local ctConstraint = Instance.new("UITextSizeConstraint", contentTitle)
+ctConstraint.MinTextSize = 10
+ctConstraint.MaxTextSize = 18
+
+local contentSub = Instance.new("TextLabel", contentHeader)
+contentSub.Name  = "ContentSub"
+contentSub.Text  = "Animation Manager"
+contentSub.Font  = Enum.Font.Gotham
+contentSub.TextScaled = true
+contentSub.TextColor3 = T.TextMuted
+contentSub.BackgroundTransparency = 1
+contentSub.Size  = UDim2.new(0, 160, 0, 13)
+contentSub.Position = UDim2.new(0, 14, 0.5, 5)
+contentSub.TextXAlignment = Enum.TextXAlignment.Left
+contentSub.ZIndex = 8
+
+local csConstraint = Instance.new("UITextSizeConstraint", contentSub)
+csConstraint.MinTextSize = 8
+csConstraint.MaxTextSize = 12
+
+-- Close button di content header
+local closeBtn = Instance.new("ImageButton", contentHeader)
+closeBtn.Image = "rbxassetid://91182229617087"
+closeBtn.ImageColor3 = T.Error
+closeBtn.BackgroundColor3 = Color3.fromRGB(60, 28, 38)
+closeBtn.Size  = UDim2.new(0, 36, 0, 36)
+closeBtn.Position = UDim2.new(1, -46, 0.5, -18)
+closeBtn.BorderSizePixel = 0
+closeBtn.ZIndex = 8
+mkCorner(closeBtn, 18)
+
+closeBtn.MouseEnter:Connect(function()
+    TweenService:Create(closeBtn, TweenInfo.new(0.18), {BackgroundColor3 = Color3.fromRGB(180,40,60)}):Play()
+end)
+closeBtn.MouseLeave:Connect(function()
+    TweenService:Create(closeBtn, TweenInfo.new(0.18), {BackgroundColor3 = Color3.fromRGB(60,28,38)}):Play()
+end)
+
+-- Header line bawah
+local chLine = Instance.new("Frame", contentHeader)
+chLine.Size  = UDim2.new(0.9, 0, 0, 1)
+chLine.Position = UDim2.new(0.05, 0, 1, -1)
+chLine.BackgroundColor3 = T.PrimaryDark
+chLine.BackgroundTransparency = 0.4
+chLine.BorderSizePixel = 0
+chLine.ZIndex = 8
+
+-- Juga bisa drag dari content header
+contentHeader.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        onDragStart(input)
+    end
+end)
+contentHeader.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        onDragEnd()
+    end
 end)
 
 -- ============================================================
--- CONTENT AREA  (shown below menu when feature active)
+-- FEATURE PAGE CONTAINER (di bawah content header)
 -- ============================================================
-local contentArea = Instance.new("Frame", hubFrame)
-contentArea.Name  = "ContentArea"
-contentArea.Size  = UDim2.new(1,-16,0,200)
-contentArea.Position = UDim2.new(0,8,0,200)
-contentArea.BackgroundColor3 = T.BgCard
-contentArea.BorderSizePixel  = 0
-contentArea.ClipsDescendants = true
-contentArea.Visible = false
-contentArea.ZIndex  = 6
-corner(contentArea, 12)
-stroke(contentArea, T.PrimaryDark, 1.5, 0.6)
+local pageContainer = Instance.new("Frame", contentArea)
+pageContainer.Name  = "PageContainer"
+pageContainer.Size  = UDim2.new(1, 0, 1, -56)
+pageContainer.Position = UDim2.new(0, 0, 0, 56)
+pageContainer.BackgroundTransparency = 1
+pageContainer.ClipsDescendants = true
+pageContainer.ZIndex = 7
+mkCorner(pageContainer, 18)
 
--- Reposition contentArea to sit right below menu
-local function repositionContent()
-    task.wait()
-    local menuBottom = 94 + menuList.AbsoluteSize.Y + 8
-    local available  = hubFrame.AbsoluteSize.Y - menuBottom - 10
-    if available > 50 then
-        contentArea.Position = UDim2.new(0,8,0,menuBottom)
-        contentArea.Size     = UDim2.new(1,-16,0,available)
+-- Border overlay — parent ke screenGui bukan mainFrame,
+-- supaya tidak kepotong ClipsDescendants tapi tetap ngikutin posisi mainFrame
+local borderOverlay = Instance.new("Frame", screenGui)
+borderOverlay.Name  = "BorderOverlay"
+borderOverlay.Size  = mainFrame.Size
+borderOverlay.Position = mainFrame.Position
+borderOverlay.BackgroundTransparency = 1
+borderOverlay.BorderSizePixel = 0
+borderOverlay.ZIndex = 20
+mkCorner(borderOverlay, 18)
+mkStroke(borderOverlay, T.Primary, 1.5, 0.5)
+
+-- Sync posisi & size overlay saat mainFrame di-drag
+RunService.RenderStepped:Connect(function()
+    if mainFrame.Visible then
+        borderOverlay.Position = mainFrame.Position
+        borderOverlay.Size     = mainFrame.Size
+        borderOverlay.Visible  = true
+    else
+        borderOverlay.Visible  = false
     end
+end)
+
+-- ============================================================
+-- ERROR CARD
+-- ============================================================
+local function showErrorCard(frame, name, errMsg, onRetry)
+    for _, ch in ipairs(frame:GetChildren()) do ch:Destroy() end
+
+    local card = Instance.new("Frame", frame)
+    card.Size  = UDim2.new(1, -24, 0, 0)
+    card.Position = UDim2.new(0, 12, 0.5, 0)
+    card.AnchorPoint = Vector2.new(0, 0.5)
+    card.BackgroundColor3 = Color3.fromRGB(55, 22, 28)
+    card.BorderSizePixel  = 0
+    card.ZIndex = 8
+    mkCorner(card, 12)
+
+    local cs = Instance.new("UIStroke", card)
+    cs.Color = T.Error; cs.Thickness = 1.5; cs.Transparency = 0.4
+
+    local cL = Instance.new("UIListLayout", card)
+    cL.SortOrder = Enum.SortOrder.LayoutOrder
+    cL.Padding   = UDim.new(0, 6)
+    cL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    local cP = Instance.new("UIPadding", card)
+    cP.PaddingTop = UDim.new(0,14); cP.PaddingBottom = UDim.new(0,14)
+    cP.PaddingLeft = UDim.new(0,12); cP.PaddingRight = UDim.new(0,12)
+
+    local function addLbl(txt, font, size, color, lo, wrap)
+        local l = Instance.new("TextLabel", card)
+        l.Text = txt; l.Font = font; l.TextSize = size
+        l.TextColor3 = color; l.BackgroundTransparency = 1
+        l.Size = UDim2.new(1, 0, 0, 0)
+        l.AutomaticSize = Enum.AutomaticSize.Y
+        l.TextXAlignment = Enum.TextXAlignment.Center
+        l.TextWrapped = wrap or false
+        l.ZIndex = 9; l.LayoutOrder = lo
+        return l
+    end
+
+    addLbl("⚠  " .. name .. " Failed to Load", Enum.Font.GothamBold, 13, T.Error, 1, true)
+
+    local div = Instance.new("Frame", card)
+    div.Size = UDim2.new(0.8, 0, 0, 1)
+    div.BackgroundColor3 = T.Error; div.BackgroundTransparency = 0.6
+    div.BorderSizePixel = 0; div.LayoutOrder = 2
+
+    addLbl(tostring(errMsg):sub(1, 220), Enum.Font.Gotham, 10, T.TextMuted, 3, true)
+    addLbl("Fitur lain tetap berfungsi normal.", Enum.Font.GothamItalic, 10, T.TextMuted, 4, false)
+
+    local retryBtn = Instance.new("TextButton", card)
+    retryBtn.Text = "↺  Retry"
+    retryBtn.Font = Enum.Font.GothamBold; retryBtn.TextSize = 12
+    retryBtn.TextColor3 = T.Text
+    retryBtn.BackgroundColor3 = T.PrimaryDark
+    retryBtn.BorderSizePixel = 0
+    retryBtn.Size = UDim2.new(0.6, 0, 0, 30)
+    retryBtn.ZIndex = 9; retryBtn.LayoutOrder = 5
+    mkCorner(retryBtn, 8)
+
+    retryBtn.MouseEnter:Connect(function()
+        TweenService:Create(retryBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.Primary}):Play()
+    end)
+    retryBtn.MouseLeave:Connect(function()
+        TweenService:Create(retryBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.PrimaryDark}):Play()
+    end)
+    retryBtn.MouseButton1Click:Connect(onRetry)
+
+    cL:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        card.Size = UDim2.new(1, -24, 0, cL.AbsoluteContentSize.Y + 28)
+    end)
 end
 
-menuLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(repositionContent)
-hubFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(repositionContent)
+local function showLoadingCard(frame, name)
+    for _, ch in ipairs(frame:GetChildren()) do ch:Destroy() end
+    local lbl = Instance.new("TextLabel", frame)
+    lbl.Text = "⏳  Loading " .. name .. "..."
+    lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 13
+    lbl.TextColor3 = T.TextMuted; lbl.BackgroundTransparency = 1
+    lbl.Size = UDim2.new(1, 0, 1, 0)
+    lbl.TextXAlignment = Enum.TextXAlignment.Center
+    lbl.TextYAlignment = Enum.TextYAlignment.Center
+    lbl.ZIndex = 8
+    TweenService:Create(lbl,
+        TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+        {TextColor3 = T.PrimaryLight}
+    ):Play()
+end
 
 -- ============================================================
--- MENU BUTTON FACTORY
+-- MENU BUTTON + FEATURE SYSTEM
 -- ============================================================
-local menuBtns   = {}
-local activePage = nil
-local loadedFeatures = {}  -- cache: nama → frame (sudah di-load)
+local menuBtns      = {}
+local activePage    = nil
+local loadedFeatures = {}
+
+-- Nama & subtitle per fitur untuk content header
+local FeatureTitles = {
+    Animation  = {"SAN ANIMATIONS",  "Animation Manager"},
+    Walkspeed  = {"WALKSPEED",        "Speed Controller"},
+    InfoServer = {"INFO SERVER",      "Server Information"},
+}
 
 local function deselectAll()
-    for name, btn in pairs(menuBtns) do
+    for _, btn in pairs(menuBtns) do
         TweenService:Create(btn, TweenInfo.new(0.18), {BackgroundColor3 = T.BgCard}):Play()
         local i = btn:FindFirstChild("Icon")
         local l = btn:FindFirstChild("Label")
         if i then i.ImageColor3 = T.TextMuted end
         if l then l.TextColor3  = T.TextMuted end
+        -- reset accent bar
+        local ab = btn:FindFirstChild("AccentBar")
+        if ab then TweenService:Create(ab, TweenInfo.new(0.18), {BackgroundColor3 = T.Primary, BackgroundTransparency = 0.5}):Play() end
     end
 end
 
@@ -488,200 +759,50 @@ local function selectBtn(name)
     TweenService:Create(btn, TweenInfo.new(0.18), {BackgroundColor3 = T.PrimaryDark}):Play()
     local i = btn:FindFirstChild("Icon")
     local l = btn:FindFirstChild("Label")
-    if i then i.ImageColor3 = T.Accent end
-    if l then l.TextColor3  = T.Accent end
+    local ab = btn:FindFirstChild("AccentBar")
+    if i  then i.ImageColor3  = T.Accent end
+    if l  then l.TextColor3   = T.Accent end
+    if ab then TweenService:Create(ab, TweenInfo.new(0.18), {BackgroundColor3 = T.Accent, BackgroundTransparency = 0}):Play() end
+
+    -- Update content header title
+    local titles = FeatureTitles[name]
+    if titles then
+        contentTitle.Text = titles[1]
+        contentSub.Text   = titles[2]
+    else
+        contentTitle.Text = name:upper()
+        contentSub.Text   = ""
+    end
 end
 
--- ============================================================
--- ERROR CARD  (ditampilkan di dalam frame kalau fitur gagal load)
--- ============================================================
-local function showErrorCard(frame, name, errMsg, onRetry)
-    -- Bersihkan isi frame dulu (hapus loading label, dll)
-    for _, ch in ipairs(frame:GetChildren()) do ch:Destroy() end
-
-    -- Background card
-    local card = Instance.new("Frame", frame)
-    card.Name  = "ErrorCard"
-    card.Size  = UDim2.new(1, -24, 0, 0)  -- height auto
-    card.Position = UDim2.new(0, 12, 0.5, 0)
-    card.AnchorPoint = Vector2.new(0, 0.5)
-    card.BackgroundColor3 = Color3.fromRGB(55, 22, 28)
-    card.BorderSizePixel  = 0
-    card.ZIndex = 8
-    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
-
-    local cardStroke = Instance.new("UIStroke", card)
-    cardStroke.Color = T.Error
-    cardStroke.Thickness = 1.5
-    cardStroke.Transparency = 0.4
-
-    local cardLayout = Instance.new("UIListLayout", card)
-    cardLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    cardLayout.Padding   = UDim.new(0, 6)
-    cardLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
-    local cardPad = Instance.new("UIPadding", card)
-    cardPad.PaddingTop    = UDim.new(0, 14)
-    cardPad.PaddingBottom = UDim.new(0, 14)
-    cardPad.PaddingLeft   = UDim.new(0, 12)
-    cardPad.PaddingRight  = UDim.new(0, 12)
-
-    -- Icon error
-    local iconFrame = Instance.new("Frame", card)
-    iconFrame.Name  = "IconFrame"
-    iconFrame.Size  = UDim2.new(0, 40, 0, 40)
-    iconFrame.BackgroundColor3 = T.Error
-    iconFrame.BackgroundTransparency = 0.8
-    iconFrame.BorderSizePixel = 0
-    iconFrame.LayoutOrder = 1
-    Instance.new("UICorner", iconFrame).CornerRadius = UDim.new(0.5, 0)
-
-    local icon = Instance.new("ImageLabel", iconFrame)
-    icon.Image = "rbxassetid://16913919379"
-    icon.ImageColor3 = T.Error
-    icon.Size = UDim2.new(0, 24, 0, 24)
-    icon.Position = UDim2.new(0.5, -12, 0.5, -12)
-    icon.BackgroundTransparency = 1
-    icon.ZIndex = 9
-
-    -- Title
-    local title = Instance.new("TextLabel", card)
-    title.Text  = "⚠ " .. name .. " Failed to Load"
-    title.Font  = Enum.Font.GothamBold
-    title.TextSize = 13
-    title.TextColor3 = T.Error
-    title.BackgroundTransparency = 1
-    title.Size  = UDim2.new(1, 0, 0, 18)
-    title.TextXAlignment = Enum.TextXAlignment.Center
-    title.TextWrapped = true
-    title.ZIndex = 9
-    title.LayoutOrder = 2
-
-    -- Divider
-    local divider = Instance.new("Frame", card)
-    divider.Size  = UDim2.new(0.8, 0, 0, 1)
-    divider.BackgroundColor3 = T.Error
-    divider.BackgroundTransparency = 0.6
-    divider.BorderSizePixel = 0
-    divider.LayoutOrder = 3
-
-    -- Error message (detail)
-    local errLbl = Instance.new("TextLabel", card)
-    errLbl.Text  = tostring(errMsg):sub(1, 200)  -- limit panjang
-    errLbl.Font  = Enum.Font.Gotham
-    errLbl.TextSize = 10
-    errLbl.TextColor3 = T.TextMuted
-    errLbl.BackgroundTransparency = 1
-    errLbl.Size  = UDim2.new(1, 0, 0, 0)
-    errLbl.AutomaticSize = Enum.AutomaticSize.Y
-    errLbl.TextXAlignment = Enum.TextXAlignment.Center
-    errLbl.TextWrapped = true
-    errLbl.ZIndex = 9
-    errLbl.LayoutOrder = 4
-
-    -- Hint text
-    local hint = Instance.new("TextLabel", card)
-    hint.Text  = "Fitur lain tetap berfungsi normal."
-    hint.Font  = Enum.Font.GothamItalic
-    hint.TextSize = 10
-    hint.TextColor3 = T.TextMuted
-    hint.BackgroundTransparency = 1
-    hint.Size  = UDim2.new(1, 0, 0, 14)
-    hint.TextXAlignment = Enum.TextXAlignment.Center
-    hint.ZIndex = 9
-    hint.LayoutOrder = 5
-
-    -- Retry button
-    local retryBtn = Instance.new("TextButton", card)
-    retryBtn.Text  = "↺  Retry"
-    retryBtn.Font  = Enum.Font.GothamBold
-    retryBtn.TextSize = 12
-    retryBtn.TextColor3 = T.Text
-    retryBtn.BackgroundColor3 = T.PrimaryDark
-    retryBtn.BorderSizePixel  = 0
-    retryBtn.Size  = UDim2.new(0.6, 0, 0, 30)
-    retryBtn.ZIndex = 9
-    retryBtn.LayoutOrder = 6
-    Instance.new("UICorner", retryBtn).CornerRadius = UDim.new(0, 8)
-
-    retryBtn.MouseEnter:Connect(function()
-        TweenService:Create(retryBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.Primary}):Play()
-    end)
-    retryBtn.MouseLeave:Connect(function()
-        TweenService:Create(retryBtn, TweenInfo.new(0.15), {BackgroundColor3 = T.PrimaryDark}):Play()
-    end)
-    retryBtn.MouseButton1Click:Connect(function()
-        onRetry()
-    end)
-
-    -- Auto-size card height
-    cardLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        card.Size = UDim2.new(1, -24, 0, cardLayout.AbsoluteContentSize.Y + 28)
-    end)
-end
-
--- ============================================================
--- LOADING CARD  (spinner saat fetch URL)
--- ============================================================
-local function showLoadingCard(frame, name)
-    for _, ch in ipairs(frame:GetChildren()) do ch:Destroy() end
-
-    local lbl = Instance.new("TextLabel", frame)
-    lbl.Name  = "LoadingLabel"
-    lbl.Text  = "⏳  Loading " .. name .. "..."
-    lbl.Font  = Enum.Font.GothamBold
-    lbl.TextSize = 13
-    lbl.TextColor3 = T.TextMuted
-    lbl.BackgroundTransparency = 1
-    lbl.Size  = UDim2.new(1, 0, 1, 0)
-    lbl.TextXAlignment = Enum.TextXAlignment.Center
-    lbl.TextYAlignment = Enum.TextYAlignment.Center
-    lbl.ZIndex = 8
-
-    -- Subtle pulse animation
-    TweenService:Create(lbl, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        TextColor3 = T.PrimaryLight
-    }):Play()
-end
-
--- ============================================================
--- LAZY LOAD FEATURE  (isolated per-feature, error tidak menyebar)
--- ============================================================
 local function loadFeature(name)
-    -- Kalau sudah pernah di-load sukses, langsung return frame
     if loadedFeatures[name] and loadedFeatures[name].loaded then
         return loadedFeatures[name].frame
     end
 
     local url = FeatureURLs[name]
-
-    -- Buat frame kalau belum ada
     local frame
     if loadedFeatures[name] then
         frame = loadedFeatures[name].frame
     else
-        frame = Instance.new("Frame", contentArea)
-        frame.Name  = name .. "Frame"
-        frame.Size  = UDim2.new(1, 0, 1, 0)
+        frame = Instance.new("Frame", pageContainer)
+        frame.Name = name .. "Frame"
+        frame.Size = UDim2.new(1, 0, 1, 0)
         frame.BackgroundTransparency = 1
         frame.Visible = false
-        frame.ZIndex  = 7
-        loadedFeatures[name] = { frame = frame, loaded = false }
+        frame.ZIndex  = 8
+        loadedFeatures[name] = {frame = frame, loaded = false}
     end
 
-    -- Kalau tidak ada URL → tampilkan error langsung
     if not url then
         showErrorCard(frame, name, "URL tidak terdaftar di FeatureURLs.", function()
-            -- retry tidak bisa kalau URL memang tidak ada
             Notify("Warning", name .. " tidak ada URL-nya!", 3)
         end)
         return frame
     end
 
-    -- Tampilkan loading state
     showLoadingCard(frame, name)
 
-    -- Load script di coroutine terpisah — TIDAK mempengaruhi fitur lain
     coroutine.wrap(function()
         local scriptSource
         local fetchOk, fetchErr = pcall(function()
@@ -689,9 +810,8 @@ local function loadFeature(name)
         end)
 
         if not fetchOk or not scriptSource or scriptSource == "" then
-            -- Gagal fetch URL
-            showErrorCard(frame, name, "Gagal mengambil script dari URL:\n" .. tostring(fetchErr), function()
-                loadedFeatures[name] = nil  -- reset cache supaya bisa retry
+            showErrorCard(frame, name, "Gagal fetch URL:\n" .. tostring(fetchErr), function()
+                loadedFeatures[name] = nil
                 loadFeature(name)
             end)
             Notify("Error", name .. " gagal di-fetch!", 4)
@@ -699,7 +819,6 @@ local function loadFeature(name)
             return
         end
 
-        -- Compile + execute script dalam pcall terpisah
         local compiled, compileErr = loadstring(scriptSource)
         if not compiled then
             showErrorCard(frame, name, "Syntax error:\n" .. tostring(compileErr), function()
@@ -711,7 +830,6 @@ local function loadFeature(name)
             return
         end
 
-        -- Jalankan script (runtime error ditangkap di sini)
         _G.SanHub.CurrentFrame = frame
         _G.SanHub.Theme = T
         local runOk, runErr = pcall(compiled)
@@ -733,90 +851,76 @@ local function loadFeature(name)
 end
 
 local function showFeature(name)
-    -- Toggle off jika klik menu yang sama
+    -- Toggle off kalau klik menu yang sama
     if activePage == name then
         deselectAll()
         activePage = nil
-        -- hide semua frame di contentArea
-        for _, ch in ipairs(contentArea:GetChildren()) do
+        for _, ch in ipairs(pageContainer:GetChildren()) do
             if ch:IsA("Frame") then ch.Visible = false end
         end
-        contentArea.Visible = false
+        placeholderLbl.Visible = true
+        contentTitle.Text = "SAN HUB"
+        contentSub.Text   = "Script Hub"
         return
     end
 
     deselectAll()
     selectBtn(name)
     activePage = name
+    placeholderLbl.Visible = false
 
-    -- Hide semua frame lain
-    for _, ch in ipairs(contentArea:GetChildren()) do
+    for _, ch in ipairs(pageContainer:GetChildren()) do
         if ch:IsA("Frame") then ch.Visible = false end
     end
 
-    -- Load (kalau belum) lalu show
     local frame = loadFeature(name)
-    if frame then
-        contentArea.Visible = true
-        frame.Visible = true
-    end
-
-    -- Kalau masih loading (async), pantau sampai frame muncul kontennya
-    -- (frame sudah di-return duluan, konten akan muncul otomatis setelah load)
+    if frame then frame.Visible = true end
 end
 
-local function addMenuBtn(name, iconId, order, onClick)
+-- ============================================================
+-- ADD MENU BUTTON
+-- ============================================================
+local function addMenuBtn(name, iconId, order)
     local btn = Instance.new("TextButton", menuList)
     btn.Name  = name .. "Btn"
     btn.Text  = ""
     btn.BackgroundColor3 = T.BgCard
     btn.BorderSizePixel  = 0
-    btn.Size  = UDim2.new(1,0,0,42)
+    btn.Size  = UDim2.new(1, 0, 0, 40)
     btn.LayoutOrder = order
-    btn.ZIndex = 7
-    corner(btn, 10)
+    btn.ZIndex = 8
+    mkCorner(btn, 10)
 
     local accentBar = Instance.new("Frame", btn)
-    accentBar.Size  = UDim2.new(0,3,0.6,0)
-    accentBar.Position = UDim2.new(0,6,0.2,0)
+    accentBar.Name  = "AccentBar"
+    accentBar.Size  = UDim2.new(0, 3, 0.6, 0)
+    accentBar.Position = UDim2.new(0, 5, 0.2, 0)
     accentBar.BackgroundColor3 = T.Primary
-    accentBar.BackgroundTransparency = 0.4
+    accentBar.BackgroundTransparency = 0.5
     accentBar.BorderSizePixel = 0
-    accentBar.ZIndex = 8
-    Instance.new("UICorner", accentBar).CornerRadius = UDim.new(1,0)
+    accentBar.ZIndex = 9
+    Instance.new("UICorner", accentBar).CornerRadius = UDim.new(1, 0)
 
     local ico = Instance.new("ImageLabel", btn)
     ico.Name  = "Icon"
     ico.Image = iconId
     ico.ImageColor3 = T.TextMuted
-    ico.Size  = UDim2.new(0,20,0,20)
-    ico.Position = UDim2.new(0,16,0.5,-10)
+    ico.Size  = UDim2.new(0, 20, 0, 20)
+    ico.Position = UDim2.new(0, 14, 0.5, -10)
     ico.BackgroundTransparency = 1
-    ico.ZIndex = 8
+    ico.ZIndex = 9
 
     local lbl = Instance.new("TextLabel", btn)
     lbl.Name  = "Label"
     lbl.Text  = name
     lbl.Font  = Enum.Font.GothamBold
-    lbl.TextSize = 13
+    lbl.TextSize = 12
     lbl.TextColor3 = T.TextMuted
     lbl.BackgroundTransparency = 1
-    lbl.Size  = UDim2.new(1,-46,1,0)
-    lbl.Position = UDim2.new(0,44,0,0)
+    lbl.Size  = UDim2.new(1, -42, 1, 0)
+    lbl.Position = UDim2.new(0, 40, 0, 0)
     lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.ZIndex = 8
-
-    -- Arrow indicator kanan
-    local arrow = Instance.new("TextLabel", btn)
-    arrow.Text  = "›"
-    arrow.Font  = Enum.Font.GothamBold
-    arrow.TextSize = 18
-    arrow.TextColor3 = T.TextMuted
-    arrow.BackgroundTransparency = 1
-    arrow.Size  = UDim2.new(0,18,1,0)
-    arrow.Position = UDim2.new(1,-22,0,0)
-    arrow.TextXAlignment = Enum.TextXAlignment.Center
-    arrow.ZIndex = 8
+    lbl.ZIndex = 9
 
     btn.MouseEnter:Connect(function()
         if activePage ~= name then
@@ -828,8 +932,7 @@ local function addMenuBtn(name, iconId, order, onClick)
             TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = T.BgCard}):Play()
         end
     end)
-
-    btn.MouseButton1Click:Connect(onClick or function()
+    btn.MouseButton1Click:Connect(function()
         showFeature(name)
     end)
 
@@ -838,63 +941,38 @@ local function addMenuBtn(name, iconId, order, onClick)
 end
 
 -- ============================================================
--- DAFTAR MENU  ← tambah fitur baru di sini
+-- DAFTAR MENU ← tambah fitur baru di sini
 -- ============================================================
-addMenuBtn("Animation", "rbxassetid://129775391836345", 1)
-addMenuBtn("Walkspeed",  "rbxassetid://100773799716592", 2)
--- addMenuBtn("ESP",     "rbxassetid://7733960981",      3)
+addMenuBtn("Animation",  "rbxassetid://129775391836345", 1)
+addMenuBtn("InfoServer", "rbxassetid://7733960981",      2)
+addMenuBtn("Walkspeed",  "rbxassetid://100773799716592", 3)
+-- addMenuBtn("ESP",     "rbxassetid://7733960981",      4)
 
 -- ============================================================
--- DIVIDER LABEL helper (opsional)
+-- TOGGLE OPEN / CLOSE
 -- ============================================================
-local function addDivider(labelText, order)
-    local div = Instance.new("Frame", menuList)
-    div.Size  = UDim2.new(1,0,0,20)
-    div.BackgroundTransparency = 1
-    div.LayoutOrder = order
-    div.ZIndex = 6
-
-    local line = Instance.new("Frame", div)
-    line.Size  = UDim2.new(0.85,0,0,1)
-    line.Position = UDim2.new(0.075,0,0.5,0)
-    line.BackgroundColor3 = T.PrimaryDark
-    line.BackgroundTransparency = 0.5
-    line.BorderSizePixel = 0
-
-    local lbl = Instance.new("TextLabel", div)
-    lbl.Text  = labelText
-    lbl.Font  = Enum.Font.GothamBold
-    lbl.TextSize = 9
-    lbl.TextColor3 = T.TextMuted
-    lbl.BackgroundColor3 = T.BgDark
-    lbl.Size  = UDim2.new(0,70,1,0)
-    lbl.Position = UDim2.new(0.5,-35,0,0)
-    lbl.TextXAlignment = Enum.TextXAlignment.Center
-    lbl.ZIndex = 7
-end
-
--- ============================================================
--- TOGGLE OPEN / CLOSE (slide kiri)
--- ============================================================
-local isOpen   = false
-local OPEN_POS = UDim2.new(0, 70, 0.13, 0)
-local HIDE_POS = UDim2.new(0, -HUB_W-20, 0.13, 0)
+local isOpen = false
 
 local function openHub()
     isOpen = true
-    hubFrame.Visible  = true
-    hubFrame.Position = HIDE_POS
-    TweenService:Create(hubFrame,   TweenInfo.new(0.32, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = OPEN_POS}):Play()
-    TweenService:Create(toggleBtn,  TweenInfo.new(0.2),  {BackgroundColor3 = T.PrimaryDark, ImageColor3 = T.Text}):Play()
-    repositionContent()
+    mainFrame.Visible = true
+    mainFrame.BackgroundTransparency = 0.4
+    TweenService:Create(mainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 0.05
+    }):Play()
+    TweenService:Create(toggleBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = T.PrimaryDark,
+        ImageColor3 = T.Text,
+    }):Play()
 end
 
 local function closeHub()
     isOpen = false
-    TweenService:Create(hubFrame,  TweenInfo.new(0.26, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Position = HIDE_POS}):Play()
-    TweenService:Create(toggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = T.BgMid, ImageColor3 = T.Accent}):Play()
-    task.wait(0.28)
-    if not isOpen then hubFrame.Visible = false end
+    mainFrame.Visible = false
+    TweenService:Create(toggleBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = T.BgMid,
+        ImageColor3 = T.Accent,
+    }):Play()
 end
 
 toggleBtn.MouseButton1Click:Connect(function()
@@ -913,10 +991,6 @@ end)
 -- ============================================================
 -- INIT
 -- ============================================================
-local isTouchDevice = UserInputService.TouchEnabled
-    and not UserInputService.KeyboardEnabled
-    and not UserInputService.MouseEnabled
-
 Notify("Welcome", isTouchDevice and "Tap icon to open Hub!" or "Press B to open Hub!", 6)
 
 end)
