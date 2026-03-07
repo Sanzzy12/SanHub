@@ -661,7 +661,7 @@ local c7layout = Instance.new("UIListLayout", card7)
 c7layout.SortOrder = Enum.SortOrder.LayoutOrder
 c7layout.Padding = UDim.new(0, 8)
 
-cardTitle(card7, "rbxassetid://7733720784", "REJOIN", 9).LayoutOrder = 0
+cardTitle(card7, "rbxassetid://15000801352", "REJOIN", 9).LayoutOrder = 0
 
 -- Info text
 local rejoinInfo = Instance.new("TextLabel", card7)
@@ -684,7 +684,7 @@ rejoinBtnRow.LayoutOrder = 2
 rejoinBtnRow.ZIndex = 9
 
 local rejoinSameBtn = Instance.new("TextButton", rejoinBtnRow)
-rejoinSameBtn.Text = "↺  Same Server"
+rejoinSameBtn.Text = "Same Server"
 rejoinSameBtn.Font = Enum.Font.GothamBold
 rejoinSameBtn.TextSize = 11
 rejoinSameBtn.TextColor3 = T.Text
@@ -695,7 +695,7 @@ rejoinSameBtn.ZIndex = 10
 mkCorner(rejoinSameBtn, 8)
 
 local rejoinNewBtn = Instance.new("TextButton", rejoinBtnRow)
-rejoinNewBtn.Text = "⟶  New Server"
+rejoinNewBtn.Text = "New Server"
 rejoinNewBtn.Font = Enum.Font.GothamBold
 rejoinNewBtn.TextSize = 11
 rejoinNewBtn.TextColor3 = T.Text
@@ -731,7 +731,7 @@ rejoinSameBtn.MouseButton1Click:Connect(function()
         TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, Players.LocalPlayer)
     end)
     task.delay(3, function()
-        rejoinSameBtn.Text = "↺  Same Server"
+        rejoinSameBtn.Text = "Same Server"
     end)
 end)
 
@@ -743,7 +743,7 @@ rejoinNewBtn.MouseButton1Click:Connect(function()
         TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
     end)
     task.delay(3, function()
-        rejoinNewBtn.Text = "⟶  New Server"
+        rejoinNewBtn.Text = "New Server"
     end)
 end)
 
@@ -791,7 +791,7 @@ lowBtnRow.LayoutOrder = 3
 lowBtnRow.ZIndex = 9
 
 local joinLowBtn = Instance.new("TextButton", lowBtnRow)
-joinLowBtn.Text = "🔍  Find Low Player Server"
+joinLowBtn.Text = "Find Low Player Server"
 joinLowBtn.Font = Enum.Font.GothamBold
 joinLowBtn.TextSize = 11
 joinLowBtn.TextColor3 = T.Text
@@ -892,7 +892,7 @@ local refreshCard = makeCard(9, 38)
 refreshCard.BackgroundTransparency = 1
 
 local refreshBtn = Instance.new("TextButton", refreshCard)
-refreshBtn.Text = "↺  Refresh Data"
+refreshBtn.Text = "Refresh Data"
 refreshBtn.Font = Enum.Font.GothamBold
 refreshBtn.TextSize = 12
 refreshBtn.TextColor3 = T.Text
