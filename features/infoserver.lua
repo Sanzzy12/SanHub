@@ -149,7 +149,7 @@ local function makeCopyBtn(parent, getValue, xPos, yPos, zindex)
             btn.Text = "✓ Copied"
             btn.BackgroundColor3 = T.Success
             task.delay(1.5, function()
-                btn.Text = "⎘ Copy"
+                btn.Text = "📋 Copy"
                 TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = T.PrimaryDark}):Play()
             end)
             Notify("Copied", "Copied to clipboard!", 2)
