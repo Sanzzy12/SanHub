@@ -1,3 +1,4 @@
+
 -- ============================================================
 --  SAN HUB — main.lua
 --  Layout: Wrapper besar (draggable) = sidebar kiri + content kanan
@@ -208,12 +209,11 @@ end
 -- ============================================================
 local isTouchDevice = UserInputService.TouchEnabled
     and not UserInputService.KeyboardEnabled
-    and not UserInputService.MouseEnabled
 
 -- ============================================================
 -- SIDEBAR WIDTH
 -- ============================================================
-local SIDEBAR_W = 160  -- lebar sidebar kiri
+local SIDEBAR_W = 160
 
 -- ============================================================
 -- TOGGLE ICON BUTTON (draggable, selalu visible)
@@ -240,8 +240,7 @@ TweenService:Create(toggleBtn,
 ):Play()
 
 -- ============================================================
--- MAIN WRAPPER (draggable, ukuran sama kayak script asli)
--- Isi: sidebar kiri + content kanan
+-- MAIN WRAPPER
 -- ============================================================
 local mainFrame = Instance.new("Frame")
 mainFrame.Name  = "MainFrame"
@@ -264,7 +263,7 @@ mainGrad.Color = ColorSequence.new({
 mainGrad.Rotation = 135
 
 -- ============================================================
--- DRAG LOGIC (drag dari header)
+-- DRAG LOGIC
 -- ============================================================
 local dragging, dragStart, startPos = false, nil, nil
 
@@ -288,7 +287,7 @@ local function onDragEnd()
 end
 
 -- ============================================================
--- SIDEBAR FRAME (kiri, di dalam mainFrame)
+-- SIDEBAR
 -- ============================================================
 local sidebar = Instance.new("Frame", mainFrame)
 sidebar.Name  = "Sidebar"
@@ -298,11 +297,9 @@ sidebar.BackgroundColor3 = T.BgDark
 sidebar.BorderSizePixel  = 0
 sidebar.ZIndex = 6
 sidebar.ClipsDescendants = true
--- Corner hanya di sisi kiri (sudut kiri atas & bawah) dengan radius sama kayak mainFrame
 local sideCorner = Instance.new("UICorner", sidebar)
 sideCorner.CornerRadius = UDim.new(0, 18)
 
--- Gradient sidebar
 local sideGrad = Instance.new("UIGradient", sidebar)
 sideGrad.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, T.PrimaryDark),
@@ -310,7 +307,6 @@ sideGrad.Color = ColorSequence.new({
 })
 sideGrad.Rotation = 135
 
--- Garis separator kanan sidebar
 local sideDiv = Instance.new("Frame", sidebar)
 sideDiv.Size  = UDim2.new(0, 1, 1, 0)
 sideDiv.Position = UDim2.new(1, -1, 0, 0)
@@ -320,7 +316,7 @@ sideDiv.BorderSizePixel = 0
 sideDiv.ZIndex = 7
 
 -- ============================================================
--- SIDEBAR HEADER (logo + title, juga area drag)
+-- SIDEBAR HEADER
 -- ============================================================
 local sideHeader = Instance.new("Frame", sidebar)
 sideHeader.Name  = "SideHeader"
@@ -328,6 +324,7 @@ sideHeader.Size  = UDim2.new(1, 0, 0, 56)
 sideHeader.BackgroundColor3 = T.BgDark
 sideHeader.BorderSizePixel  = 0
 sideHeader.ZIndex = 7
+mkCorner(sideHeader, 18)
 
 local shGrad = Instance.new("UIGradient", sideHeader)
 shGrad.Color = ColorSequence.new({
@@ -366,7 +363,6 @@ shSub.Position = UDim2.new(0, 40, 0.5, 4)
 shSub.TextXAlignment = Enum.TextXAlignment.Left
 shSub.ZIndex = 8
 
--- Header separator
 local shLine = Instance.new("Frame", sideHeader)
 shLine.Size  = UDim2.new(0.85, 0, 0, 1)
 shLine.Position = UDim2.new(0.075, 0, 1, -1)
@@ -375,7 +371,6 @@ shLine.BackgroundTransparency = 0.4
 shLine.BorderSizePixel = 0
 shLine.ZIndex = 8
 
--- Drag dari header sidebar
 sideHeader.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
     or input.UserInputType == Enum.UserInputType.Touch then
@@ -397,7 +392,7 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ============================================================
--- INFO BAR di sidebar (Clock | FPS)
+-- INFO BAR (Clock | FPS)
 -- ============================================================
 local infoBar = Instance.new("Frame", sidebar)
 infoBar.Size  = UDim2.new(1, -12, 0, 26)
@@ -440,7 +435,6 @@ fpsLbl.TextXAlignment = Enum.TextXAlignment.Center
 fpsLbl.TextYAlignment = Enum.TextYAlignment.Center
 fpsLbl.ZIndex = 8
 
--- FPS + Clock updater
 local fpsBuffer, lastFpsT, lastClkT = {}, 0, 0
 RunService.RenderStepped:Connect(function(dt)
     local now = os.clock()
@@ -462,7 +456,6 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
--- URL label bawah sidebar
 local urlLbl = Instance.new("TextLabel", sidebar)
 urlLbl.Text  = "sanzzy.xyz"
 urlLbl.Font  = Enum.Font.GothamBold
@@ -475,7 +468,7 @@ urlLbl.TextXAlignment = Enum.TextXAlignment.Center
 urlLbl.ZIndex = 7
 
 -- ============================================================
--- MENU LIST (di sidebar, di bawah info bar)
+-- MENU LIST
 -- ============================================================
 local menuList = Instance.new("Frame", sidebar)
 menuList.Name  = "MenuList"
@@ -489,7 +482,7 @@ menuLayout.SortOrder = Enum.SortOrder.LayoutOrder
 menuLayout.Padding   = UDim.new(0, 5)
 
 -- ============================================================
--- CONTENT AREA (kanan, di dalam mainFrame)
+-- CONTENT AREA
 -- ============================================================
 local contentArea = Instance.new("Frame", mainFrame)
 contentArea.Name  = "ContentArea"
@@ -499,11 +492,9 @@ contentArea.BackgroundColor3 = T.BgDark
 contentArea.BorderSizePixel  = 0
 contentArea.ClipsDescendants = true
 contentArea.ZIndex = 6
--- Corner di sisi kanan supaya sudut kanan atas & bawah rounded
 local contentCorner = Instance.new("UICorner", contentArea)
 contentCorner.CornerRadius = UDim.new(0, 18)
 
--- Placeholder saat belum ada fitur dibuka
 local placeholderLbl = Instance.new("TextLabel", contentArea)
 placeholderLbl.Text  = "← Pilih fitur dari menu"
 placeholderLbl.Font  = Enum.Font.GothamBold
@@ -516,7 +507,7 @@ placeholderLbl.TextYAlignment = Enum.TextYAlignment.Center
 placeholderLbl.ZIndex = 7
 
 -- ============================================================
--- HEADER UTAMA (di content area, ada close button + title fitur)
+-- CONTENT HEADER
 -- ============================================================
 local contentHeader = Instance.new("Frame", contentArea)
 contentHeader.Name  = "ContentHeader"
@@ -524,6 +515,7 @@ contentHeader.Size  = UDim2.new(1, 0, 0, 56)
 contentHeader.BackgroundColor3 = T.BgDark
 contentHeader.BorderSizePixel  = 0
 contentHeader.ZIndex = 7
+mkCorner(contentHeader, 18)
 
 local chGrad = Instance.new("UIGradient", contentHeader)
 chGrad.Color = ColorSequence.new({
@@ -533,7 +525,6 @@ chGrad.Color = ColorSequence.new({
 })
 chGrad.Rotation = 90
 
--- Title fitur aktif
 local contentTitle = Instance.new("TextLabel", contentHeader)
 contentTitle.Name  = "ContentTitle"
 contentTitle.Text  = "SAN ANIMATIONS"
@@ -566,7 +557,6 @@ local csConstraint = Instance.new("UITextSizeConstraint", contentSub)
 csConstraint.MinTextSize = 8
 csConstraint.MaxTextSize = 12
 
--- Close button di content header
 local closeBtn = Instance.new("ImageButton", contentHeader)
 closeBtn.Image = "rbxassetid://91182229617087"
 closeBtn.ImageColor3 = T.Error
@@ -584,7 +574,6 @@ closeBtn.MouseLeave:Connect(function()
     TweenService:Create(closeBtn, TweenInfo.new(0.18), {BackgroundColor3 = Color3.fromRGB(60,28,38)}):Play()
 end)
 
--- Header line bawah
 local chLine = Instance.new("Frame", contentHeader)
 chLine.Size  = UDim2.new(0.9, 0, 0, 1)
 chLine.Position = UDim2.new(0.05, 0, 1, -1)
@@ -593,7 +582,6 @@ chLine.BackgroundTransparency = 0.4
 chLine.BorderSizePixel = 0
 chLine.ZIndex = 8
 
--- Juga bisa drag dari content header
 contentHeader.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1
     or input.UserInputType == Enum.UserInputType.Touch then
@@ -608,7 +596,7 @@ contentHeader.InputEnded:Connect(function(input)
 end)
 
 -- ============================================================
--- FEATURE PAGE CONTAINER (di bawah content header)
+-- PAGE CONTAINER
 -- ============================================================
 local pageContainer = Instance.new("Frame", contentArea)
 pageContainer.Name  = "PageContainer"
@@ -618,8 +606,9 @@ pageContainer.BackgroundTransparency = 1
 pageContainer.ClipsDescendants = true
 pageContainer.ZIndex = 7
 
--- Border overlay — parent ke screenGui bukan mainFrame,
--- supaya tidak kepotong ClipsDescendants tapi tetap ngikutin posisi mainFrame
+-- ============================================================
+-- BORDER OVERLAY
+-- ============================================================
 local borderOverlay = Instance.new("Frame", screenGui)
 borderOverlay.Name  = "BorderOverlay"
 borderOverlay.Size  = mainFrame.Size
@@ -630,7 +619,6 @@ borderOverlay.ZIndex = 20
 mkCorner(borderOverlay, 18)
 mkStroke(borderOverlay, T.Primary, 1.5, 0.5)
 
--- Sync posisi & size overlay saat mainFrame di-drag
 RunService.RenderStepped:Connect(function()
     if mainFrame.Visible then
         borderOverlay.Position = mainFrame.Position
@@ -736,7 +724,6 @@ local menuBtns      = {}
 local activePage    = nil
 local loadedFeatures = {}
 
--- Nama & subtitle per fitur untuk content header
 local FeatureTitles = {
     Animation  = {"SAN ANIMATIONS",  "Animation Manager"},
     Walkspeed  = {"WALKSPEED",        "Speed Controller"},
@@ -750,7 +737,6 @@ local function deselectAll()
         local l = btn:FindFirstChild("Label")
         if i then i.ImageColor3 = T.TextMuted end
         if l then l.TextColor3  = T.TextMuted end
-        -- reset accent bar
         local ab = btn:FindFirstChild("AccentBar")
         if ab then TweenService:Create(ab, TweenInfo.new(0.18), {BackgroundColor3 = T.Primary, BackgroundTransparency = 0.5}):Play() end
     end
@@ -767,7 +753,6 @@ local function selectBtn(name)
     if l  then l.TextColor3   = T.Accent end
     if ab then TweenService:Create(ab, TweenInfo.new(0.18), {BackgroundColor3 = T.Accent, BackgroundTransparency = 0}):Play() end
 
-    -- Update content header title
     local titles = FeatureTitles[name]
     if titles then
         contentTitle.Text = titles[1]
@@ -854,7 +839,6 @@ local function loadFeature(name)
 end
 
 local function showFeature(name)
-    -- Toggle off kalau klik menu yang sama
     if activePage == name then
         deselectAll()
         activePage = nil
@@ -944,12 +928,11 @@ local function addMenuBtn(name, iconId, order)
 end
 
 -- ============================================================
--- DAFTAR MENU ← tambah fitur baru di sini
+-- DAFTAR MENU
 -- ============================================================
 addMenuBtn("Animation",  "rbxassetid://129775391836345", 1)
 addMenuBtn("InfoServer", "rbxassetid://7733960981",      2)
 addMenuBtn("Walkspeed",  "rbxassetid://100773799716592", 3)
--- addMenuBtn("ESP",     "rbxassetid://7733960981",      4)
 
 -- ============================================================
 -- TOGGLE OPEN / CLOSE
@@ -990,6 +973,255 @@ UserInputService.InputBegan:Connect(function(input, gp)
         if isOpen then closeHub() else openHub() end
     end
 end)
+
+-- ============================================================
+-- LOADING SCREEN
+-- ============================================================
+do
+    local ls = Instance.new("ScreenGui")
+    ls.Name = "SanHubLoader"
+    ls.ResetOnSpawn = false
+    ls.IgnoreGuiInset = true
+    ls.DisplayOrder = 999
+    ls.Parent = CoreGui
+
+    local bg = Instance.new("Frame", ls)
+    bg.Size = UDim2.new(1, 0, 1, 0)
+    bg.BackgroundColor3 = T.BgDark
+    bg.BorderSizePixel = 0
+    bg.ZIndex = 1
+    bg.BackgroundTransparency = 1
+
+    local vignette = Instance.new("ImageLabel", bg)
+    vignette.Image = "rbxassetid://5709815183"
+    vignette.ImageColor3 = T.PrimaryDark
+    vignette.ImageTransparency = 0.65
+    vignette.BackgroundTransparency = 1
+    vignette.Size = UDim2.new(1.4, 0, 1.4, 0)
+    vignette.Position = UDim2.new(-0.2, 0, -0.2, 0)
+    vignette.ZIndex = 2
+
+    for i = 1, 8 do
+        local line = Instance.new("Frame", bg)
+        line.Size = UDim2.new(1, 0, 0, 1)
+        line.Position = UDim2.new(0, 0, i / 9, 0)
+        line.BackgroundColor3 = T.Primary
+        line.BackgroundTransparency = 0.88
+        line.BorderSizePixel = 0
+        line.ZIndex = 2
+    end
+    for i = 1, 6 do
+        local line = Instance.new("Frame", bg)
+        line.Size = UDim2.new(0, 1, 1, 0)
+        line.Position = UDim2.new(i / 7, 0, 0, 0)
+        line.BackgroundColor3 = T.Primary
+        line.BackgroundTransparency = 0.88
+        line.BorderSizePixel = 0
+        line.ZIndex = 2
+    end
+
+    local glow = Instance.new("ImageLabel", bg)
+    glow.Image = "rbxassetid://5709815183"
+    glow.ImageColor3 = T.Primary
+    glow.ImageTransparency = 1
+    glow.BackgroundTransparency = 1
+    glow.Size = UDim2.new(0, 420, 0, 360)
+    glow.AnchorPoint = Vector2.new(0.5, 0.5)
+    glow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    glow.ZIndex = 2
+
+    local card = Instance.new("Frame", bg)
+    card.Size = UDim2.new(0, 260, 0, 220)
+    card.AnchorPoint = Vector2.new(0.5, 0.5)
+    card.Position = UDim2.new(0.5, 0, 0.65, 0)
+    card.BackgroundColor3 = T.BgMid
+    card.BorderSizePixel = 0
+    card.ZIndex = 3
+    card.BackgroundTransparency = 1
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 20)
+
+    local cardStroke = Instance.new("UIStroke", card)
+    cardStroke.Color = T.Primary
+    cardStroke.Thickness = 1.5
+    cardStroke.Transparency = 1
+    cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    local logoFrame = Instance.new("Frame", card)
+    logoFrame.Size = UDim2.new(0, 52, 0, 52)
+    logoFrame.AnchorPoint = Vector2.new(0.5, 0)
+    logoFrame.Position = UDim2.new(0.5, 0, 0, 22)
+    logoFrame.BackgroundColor3 = T.Primary
+    logoFrame.BackgroundTransparency = 0.75
+    logoFrame.BorderSizePixel = 0
+    logoFrame.ZIndex = 4
+    Instance.new("UICorner", logoFrame).CornerRadius = UDim.new(0, 14)
+
+    local logoIcon = Instance.new("ImageLabel", logoFrame)
+    logoIcon.Image = "rbxassetid://12557404943"
+    logoIcon.ImageColor3 = T.Accent
+    logoIcon.Size = UDim2.new(0, 30, 0, 30)
+    logoIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+    logoIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+    logoIcon.BackgroundTransparency = 1
+    logoIcon.ZIndex = 5
+
+    local logoAngle = 0
+    local logoConn
+    logoConn = RunService.RenderStepped:Connect(function(dt)
+        logoAngle = logoAngle + dt * 30
+        logoIcon.Rotation = logoAngle
+    end)
+
+    local titleLbl = Instance.new("TextLabel", card)
+    titleLbl.Text = "SAN HUB"
+    titleLbl.Font = Enum.Font.GothamBold
+    titleLbl.TextSize = 22
+    titleLbl.TextColor3 = T.Text
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Size = UDim2.new(1, 0, 0, 26)
+    titleLbl.Position = UDim2.new(0, 0, 0, 86)
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Center
+    titleLbl.ZIndex = 4
+
+    local subLbl = Instance.new("TextLabel", card)
+    subLbl.Text = "Script Hub"
+    subLbl.Font = Enum.Font.Gotham
+    subLbl.TextSize = 11
+    subLbl.TextColor3 = T.TextMuted
+    subLbl.BackgroundTransparency = 1
+    subLbl.Size = UDim2.new(1, 0, 0, 16)
+    subLbl.Position = UDim2.new(0, 0, 0, 114)
+    subLbl.TextXAlignment = Enum.TextXAlignment.Center
+    subLbl.ZIndex = 4
+
+    local barBg = Instance.new("Frame", card)
+    barBg.Size = UDim2.new(0, 200, 0, 5)
+    barBg.AnchorPoint = Vector2.new(0.5, 0)
+    barBg.Position = UDim2.new(0.5, 0, 0, 148)
+    barBg.BackgroundColor3 = T.BgLight
+    barBg.BorderSizePixel = 0
+    barBg.ZIndex = 4
+    Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+
+    local barFill = Instance.new("Frame", barBg)
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    barFill.BackgroundColor3 = T.Primary
+    barFill.BorderSizePixel = 0
+    barFill.ZIndex = 5
+    Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
+
+    local shimmer = Instance.new("Frame", barFill)
+    shimmer.Size = UDim2.new(0, 40, 1, 0)
+    shimmer.Position = UDim2.new(0, -40, 0, 0)
+    shimmer.BackgroundColor3 = Color3.new(1, 1, 1)
+    shimmer.BackgroundTransparency = 0.7
+    shimmer.BorderSizePixel = 0
+    shimmer.ZIndex = 6
+    Instance.new("UICorner", shimmer).CornerRadius = UDim.new(1, 0)
+
+    local statusLbl = Instance.new("TextLabel", card)
+    statusLbl.Text = "Initializing..."
+    statusLbl.Font = Enum.Font.Gotham
+    statusLbl.TextSize = 10
+    statusLbl.TextColor3 = T.TextMuted
+    statusLbl.BackgroundTransparency = 1
+    statusLbl.Size = UDim2.new(1, 0, 0, 14)
+    statusLbl.Position = UDim2.new(0, 0, 0, 163)
+    statusLbl.TextXAlignment = Enum.TextXAlignment.Center
+    statusLbl.ZIndex = 4
+
+    local dotsLbl = Instance.new("TextLabel", card)
+    dotsLbl.Text = "●  ●  ●"
+    dotsLbl.Font = Enum.Font.GothamBold
+    dotsLbl.TextSize = 8
+    dotsLbl.TextColor3 = T.Primary
+    dotsLbl.BackgroundTransparency = 1
+    dotsLbl.Size = UDim2.new(1, 0, 0, 12)
+    dotsLbl.Position = UDim2.new(0, 0, 0, 184)
+    dotsLbl.TextXAlignment = Enum.TextXAlignment.Center
+    dotsLbl.ZIndex = 4
+
+    local dotStates = {"●  ○  ○", "○  ●  ○", "○  ○  ●", "●  ●  ○", "○  ●  ●", "●  ●  ●"}
+    local dotIdx = 0
+    local dotConn
+    dotConn = RunService.RenderStepped:Connect(function()
+        dotIdx = dotIdx + 1
+        if dotIdx > #dotStates * 8 then dotIdx = 1 end
+        dotsLbl.Text = dotStates[math.ceil(dotIdx / 8)]
+    end)
+
+    -- Fade in background
+    TweenService:Create(bg, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 0
+    }):Play()
+    task.wait(0.15)
+
+    -- Card slide in dari bawah
+    TweenService:Create(card, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        BackgroundTransparency = 0.08
+    }):Play()
+    TweenService:Create(cardStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Transparency = 0.4
+    }):Play()
+    TweenService:Create(glow, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        ImageTransparency = 0.82
+    }):Play()
+
+    -- Glow pulse loop
+    TweenService:Create(glow,
+        TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+        {ImageTransparency = 0.72}
+    ):Play()
+
+    -- Progress steps
+    local steps = {
+        {0.15, "Loading theme..."},
+        {0.35, "Building UI..."},
+        {0.60, "Loading services..."},
+        {0.82, "Almost ready..."},
+        {1.00, "Welcome!"},
+    }
+
+    for _, step in ipairs(steps) do
+        local target, text = step[1], step[2]
+        statusLbl.Text = text
+        TweenService:Create(barFill, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = UDim2.new(target, 0, 1, 0)
+        }):Play()
+        shimmer.Position = UDim2.new(0, -40, 0, 0)
+        TweenService:Create(shimmer, TweenInfo.new(0.35, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(1, 0, 0, 0)
+        }):Play()
+        task.wait(0.38)
+    end
+
+    task.wait(0.25)
+
+    TweenService:Create(barFill, TweenInfo.new(0.2), {BackgroundColor3 = T.Success}):Play()
+    statusLbl.TextColor3 = T.Success
+    statusLbl.Text = "✓  Ready"
+
+    task.wait(0.55)
+
+    logoConn:Disconnect()
+    dotConn:Disconnect()
+
+    -- Card fly up + fade out
+    TweenService:Create(card, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+        Position = UDim2.new(0.5, 0, 0.38, 0),
+        BackgroundTransparency = 1
+    }):Play()
+    TweenService:Create(cardStroke, TweenInfo.new(0.35), {Transparency = 1}):Play()
+    TweenService:Create(glow, TweenInfo.new(0.35), {ImageTransparency = 1}):Play()
+    task.wait(0.2)
+    TweenService:Create(bg, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+        BackgroundTransparency = 1
+    }):Play()
+    task.wait(0.32)
+
+    ls:Destroy()
+end
 
 -- ============================================================
 -- INIT
